@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figma → Code with Claude · by Taroon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Syne:wght@400;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1e1e1e; --panel: #2c2c2c; --border: #3d3d3d;
+    --purple: #9747FF; --purple-light: #b47aff;
+    --blue: #0d99ff; --green: #14ae5c; --yellow: #ffcd29;
+    --text: #e0e0e0; --muted: #888; --white: #fff;
+    --grid: rgba(255,255,255,0.04);
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* TOOLBAR */
+  .toolbar {
+    position: sticky; top: 0;
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 10;
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 10px; }
+  .logo {
+    width: 30px; height: 30px; background: var(--purple); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; color: white;
+    font-family: 'Fragment Mono', monospace;
+  }
+  .toolbar-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .toolbar-author { font-size: 11px; font-family: 'Fragment Mono', monospace; color: var(--purple-light); }
+
+  /* MAIN */
+  main {
+    position: relative; z-index: 1;
+    max-width: 860px; margin: 0 auto;
+    padding: clamp(32px, 6vw, 72px) clamp(20px, 5vw, 40px);
+  }
+
+  .eyebrow {
+    font-family: 'Fragment Mono', monospace; font-size: 10px;
+    color: var(--purple-light); letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--purple); }
+
+  h1 {
+    font-size: clamp(32px, 6vw, 60px); font-weight: 800;
+    line-height: 1.05; letter-spacing: -0.02em;
+    color: var(--white); margin-bottom: 12px;
+  }
+  h1 span { color: var(--purple); }
+
+  .subtitle {
+    font-family: 'Instrument Serif', serif; font-style: italic;
+    font-size: clamp(15px, 2vw, 18px); color: var(--muted);
+    line-height: 1.55; margin-bottom: 40px;
+  }
+
+  .accent { width: 40px; height: 3px; background: var(--purple); border-radius: 2px; margin-bottom: 40px; }
+
+  /* CARDS */
+  .cards { display: grid; gap: 16px; }
+  @media (min-width: 560px) { .cards { grid-template-columns: 1fr 1fr; } }
+
+  .card {
+    background: #252525; border: 1px solid var(--border); border-radius: 8px;
+    padding: 28px 28px 24px;
+    text-decoration: none; color: inherit;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .card:hover {
+    border-color: var(--purple);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(151,71,255,0.15);
+  }
+  .card-badge {
+    position: absolute; top: 16px; right: 16px;
+    font-size: 9px; font-family: 'Fragment Mono', monospace;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 3px 8px; border-radius: 20px;
+  }
+  .card-badge.desktop { background: rgba(151,71,255,0.2); color: var(--purple-light); }
+  .card-badge.mobile { background: rgba(20,174,92,0.2); color: var(--green); }
+
+  .card-icon { font-size: 32px; }
+  .card-title { font-size: 20px; font-weight: 700; color: var(--white); }
+  .card-desc { font-size: 12px; font-family: 'Fragment Mono', monospace; color: var(--muted); line-height: 1.6; flex: 1; }
+
+  .card-specs {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+  }
+  .spec {
+    font-size: 10px; font-family: 'Fragment Mono', monospace;
+    padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .card-cta {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .card-cta-text {
+    font-size: 12px; font-weight: 700; color: var(--purple-light);
+    font-family: 'Fragment Mono', monospace;
+  }
+  .card-arrow { font-size: 16px; color: var(--purple-light); transition: transform 0.2s; }
+  .card:hover .card-arrow { transform: translateX(4px); }
+
+  /* INFO STRIP */
+  .info-strip {
+    margin-top: 40px;
+    background: rgba(151,71,255,0.06); border: 1px solid rgba(151,71,255,0.2);
+    border-radius: 8px; padding: 18px 22px;
+    font-size: 12px; font-family: 'Fragment Mono', monospace; color: var(--muted);
+    line-height: 1.7;
+  }
+  .info-strip strong { color: var(--text); }
+  .info-strip a { color: var(--blue); text-decoration: none; }
+  .info-strip a:hover { color: var(--purple-light); }
+
+  /* FOOTER */
+  footer {
+    margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+    font-size: 11px; font-family: 'Fragment Mono', monospace; color: var(--muted);
+  }
+  .footer-sig { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--purple-light); }
+  .footer-links { display: flex; gap: 14px; flex-wrap: wrap; }
+  .footer-links a { color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--blue); }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="logo">F→C</div>
+    <span class="toolbar-title">Figma → Code with Claude</span>
+  </div>
+  <span class="toolbar-author">by Taroon</span>
+</div>
+
+<main>
+  <div class="eyebrow">Principal Designer · March 2026</div>
+  <h1>Figma → Code<br><span>with Claude</span></h1>
+  <p class="subtitle">A field guide for designers who don't want to hand off anymore<br>and devs tired of guessing what <em>"make it pop"</em> means.</p>
+  <div class="accent"></div>
+
+  <div class="cards">
+    <a class="card" href="./desktop.html">
+      <span class="card-badge desktop">Desktop</span>
+      <span class="card-icon">🖥️</span>
+      <div class="card-title">Full Presentation</div>
+      <p class="card-desc">The complete deck with Figma-style side panels, layers list, properties panel, zoom controls, focus mode, and keyboard navigation.</p>
+      <div class="card-specs">
+        <span class="spec">16 slides</span>
+        <span class="spec">Zoom ⌘+/−</span>
+        <span class="spec">\ panels</span>
+        <span class="spec">P focus mode</span>
+      </div>
+      <div class="card-cta">
+        <span class="card-cta-text">Open desktop version</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <a class="card" href="./mobile.html">
+      <span class="card-badge mobile">Mobile</span>
+      <span class="card-icon">📱</span>
+      <div class="card-title">Mobile Version</div>
+      <p class="card-desc">Swipe-first navigation, bottom nav bar, slide drawer, fully scrollable content. Works great on phones, tablets, and any screen size.</p>
+      <div class="card-specs">
+        <span class="spec">16 slides</span>
+        <span class="spec">Swipe nav</span>
+        <span class="spec">Touch-first</span>
+        <span class="spec">Responsive</span>
+      </div>
+      <div class="card-cta">
+        <span class="card-cta-text">Open mobile version</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="info-strip">
+    <strong>What's covered:</strong> Figma MCP setup · Claude Code · Dev Mode · The design→code workflow · Prompting for UI · What Claude can/can't do · Code→Figma (Feb 2026) · Agent Skills (intro, build your own, prebuilt library) · figma-console-mcp · Pro tips<br><br>
+    <strong>Key links:</strong>
+    <a href="https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/" target="_blank">Figma MCP ↗</a> ·
+    <a href="https://claude.ai/code" target="_blank">Claude Code ↗</a> ·
+    <a href="https://code.claude.com/docs/en/skills" target="_blank">Agent Skills ↗</a> ·
+    <a href="https://skills.sh" target="_blank">skills.sh ↗</a> ·
+    <a href="https://github.com/southleft/figma-console-mcp" target="_blank">figma-console-mcp ↗</a> ·
+    <a href="https://www.figma.com/blog/introducing-claude-code-to-figma/" target="_blank">Code→Figma blog ↗</a>
+  </div>
+
+  <footer>
+    <span>Built &amp; vibe-coded by <span class="footer-sig">Taroon</span> · Principal Designer · 2026</span>
+    <div class="footer-links">
+      <a href="./desktop.html">Desktop deck</a>
+      <a href="./mobile.html">Mobile deck</a>
+      <a href="https://claude.ai" target="_blank">Claude.ai ↗</a>
+      <a href="https://figma.com" target="_blank">Figma ↗</a>
+    </div>
+  </footer>
+</main>
+
+</body>
+</html>
