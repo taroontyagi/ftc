@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>figma-to-code-with-claude · Developer Edition · by Taroon Tyagi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── GITHUB TOKENS ─── */
+:root{
+  --gh-canvas:#0d1117;
+  --gh-surface:#161b22;
+  --gh-surface2:#21262d;
+  --gh-border:#30363d;
+  --gh-border-muted:#21262d;
+  --gh-text:#e6edf3;
+  --gh-text-muted:#7d8590;
+  --gh-text-dim:#484f58;
+  --gh-accent:#2f81f7;
+  --gh-accent-muted:rgba(47,129,247,0.15);
+  --gh-green:#3fb950;
+  --gh-green-muted:rgba(63,185,80,0.15);
+  --gh-yellow:#d29922;
+  --gh-yellow-muted:rgba(210,153,34,0.15);
+  --gh-red:#f85149;
+  --gh-red-muted:rgba(248,81,73,0.12);
+  --gh-purple:#bc8cff;
+  --gh-purple-muted:rgba(188,140,255,0.12);
+  --gh-orange:#e3b341;
+  --sidebar-w:260px;
+  --topbar-h:48px;
+  --statusbar-h:28px;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--gh-canvas);color:var(--gh-text);font-family:var(--mono);overflow:hidden;}
+
+/* ─── TOPBAR (GitHub header) ─── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--topbar-h);
+  background:var(--gh-surface);border-bottom:1px solid var(--gh-border);
+  display:flex;align-items:center;padding:0 16px;gap:12px;z-index:200;
+}
+.topbar-logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--gh-text);}
+.gh-mark{width:24px;height:24px;fill:var(--gh-text);flex-shrink:0;}
+.topbar-breadcrumb{
+  display:flex;align-items:center;gap:4px;
+  font-size:13px;font-family:var(--sans);
+}
+.bc-owner{color:var(--gh-text-muted);text-decoration:none;}
+.bc-owner:hover{color:var(--gh-accent);text-decoration:underline;}
+.bc-sep{color:var(--gh-text-dim);}
+.bc-repo{font-weight:600;color:var(--gh-text);}
+.bc-ref{
+  display:flex;align-items:center;gap:5px;
+  background:var(--gh-accent-muted);border:1px solid rgba(47,129,247,0.3);
+  border-radius:20px;padding:2px 9px;font-size:11px;
+  color:var(--gh-accent);font-family:var(--mono);
+}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.gh-btn{
+  background:var(--gh-surface2);border:1px solid var(--gh-border);
+  border-radius:6px;padding:4px 12px;font-size:12px;font-family:var(--sans);
+  color:var(--gh-text);cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;gap:5px;
+}
+.gh-btn:hover{background:var(--gh-border);border-color:var(--gh-text-muted);}
+.gh-btn.primary{background:var(--gh-green);color:#0d1117;border-color:var(--gh-green);font-weight:600;}
+.gh-btn.primary:hover{filter:brightness(1.1);}
+/* ── ZOOM CONTROLS ── */
+.zoom-controls{display:flex;align-items:center;gap:3px;}
+.zoom-btn{background:transparent;border:1px solid var(--gh-border);color:var(--gh-text-muted);border-radius:4px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;line-height:1;transition:all 0.15s;font-family:var(--mono);}
+.zoom-btn:hover{background:var(--gh-surface2);color:var(--gh-text);}
+.zoom-level{background:var(--gh-surface2);border:1px solid var(--gh-border);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--gh-text);font-family:var(--mono);min-width:46px;text-align:center;cursor:pointer;transition:all 0.15s;}
+.zoom-level:hover{border-color:var(--gh-accent);color:var(--gh-accent);}
+
+/* ── PANEL TOGGLE ( \ ) ── */
+.topbar,.tabbar,.statusbar,.progress-bar{transition:opacity 0.22s ease,transform 0.22s ease;}
+.main,.sidebar{transition:left 0.22s ease,right 0.22s ease,top 0.22s ease,bottom 0.22s ease,transform 0.22s ease;}
+body.panels-hidden .topbar   {opacity:0;pointer-events:none;transform:translateY(-100%);}
+body.panels-hidden .tabbar   {opacity:0;pointer-events:none;transform:translateY(-100%);}
+body.panels-hidden .statusbar{opacity:0;pointer-events:none;transform:translateY(100%);}
+body.panels-hidden .progress-bar{opacity:0;pointer-events:none;}
+body.panels-hidden .sidebar  {transform:translateX(-100%);}
+body.panels-hidden .main     {left:0;top:0;bottom:0;}
+
+/* ── FOCUS MODE ( P ) ── */
+body.focus-mode .topbar   {opacity:0;pointer-events:none;transform:translateY(-100%);}
+body.focus-mode .tabbar   {opacity:0;pointer-events:none;transform:translateY(-100%);}
+body.focus-mode .statusbar{opacity:0;pointer-events:none;transform:translateY(100%);}
+body.focus-mode .progress-bar{opacity:0;pointer-events:none;}
+body.focus-mode .sidebar  {transform:translateX(-100%);}
+body.focus-mode .main     {left:0;top:0;bottom:0;}
+
+
+/* Focus hint pill */
+.focus-hint{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:rgba(13,17,23,0.9);backdrop-filter:blur(10px) saturate(1.4);
+  border:1px solid var(--gh-border);border-radius:20px;
+  padding:6px 18px;font-size:11px;font-family:var(--mono);
+  color:var(--gh-text-muted);z-index:9999;pointer-events:none;
+  opacity:0;transition:opacity 0.25s ease;
+  display:flex;align-items:center;gap:10px;white-space:nowrap;
+}
+body.focus-mode .focus-hint{opacity:1;}
+.focus-hint kbd{background:var(--gh-surface2);border:1px solid var(--gh-border);border-radius:3px;padding:1px 6px;color:var(--gh-text);font-size:10px;}
+
+/* Zoom wrapper */
+.zoom-wrapper{position:relative;width:100%;height:100%;transform-origin:top center;transition:transform 0.18s cubic-bezier(0.4,0,0.2,1);}
+
+
+/* ─── TAB BAR ─── */
+.tabbar{
+  position:fixed;top:var(--topbar-h);left:0;right:0;
+  background:var(--gh-surface);border-bottom:1px solid var(--gh-border);
+  display:flex;align-items:flex-end;padding:0 16px;z-index:190;
+  overflow-x:auto;scrollbar-width:none;height:40px;
+}
+.tabbar::-webkit-scrollbar{display:none;}
+.tab{
+  display:flex;align-items:center;gap:6px;padding:0 14px;
+  font-size:13px;font-family:var(--sans);color:var(--gh-text-muted);
+  cursor:pointer;border-bottom:2px solid transparent;height:40px;
+  transition:color 0.15s;white-space:nowrap;text-decoration:none;
+}
+.tab:hover{color:var(--gh-text);}
+.tab.active{color:var(--gh-text);border-bottom-color:var(--gh-orange);}
+.tab-icon{font-size:14px;}
+.tab-count{
+  background:var(--gh-surface2);border:1px solid var(--gh-border);
+  border-radius:20px;padding:1px 6px;font-size:11px;
+  color:var(--gh-text-muted);font-family:var(--mono);
+}
+
+/* ─── PROGRESS ─── */
+.progress-bar{
+  position:fixed;top:calc(var(--topbar-h) + 40px);left:var(--sidebar-w);right:0;
+  height:2px;background:var(--gh-border);z-index:180;
+  transition:left 0.2s, top 0.2s, bottom 0.2s, right 0.2s;
+}
+.progress-fill{height:100%;background:var(--gh-accent);transition:width 0.3s ease;}
+
+/* ─── SIDEBAR ─── */
+.sidebar{
+  position:fixed;left:0;top:calc(var(--topbar-h) + 40px);
+  bottom:var(--statusbar-h);width:var(--sidebar-w);
+  background:var(--gh-canvas);border-right:1px solid var(--gh-border);
+  overflow-y:auto;z-index:100;
+  scrollbar-width:thin;scrollbar-color:var(--gh-border) transparent;
+  transition:transform 0.2s ease;
+}
+.sidebar-section-header{
+  padding:10px 12px 4px;
+  font-size:10px;font-weight:600;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--gh-text-muted);
+  border-bottom:1px solid var(--gh-border-muted);
+}
+.tree-item{
+  display:flex;align-items:center;gap:7px;
+  padding:5px 12px;cursor:pointer;
+  font-size:12px;font-family:var(--mono);
+  color:var(--gh-text-muted);
+  transition:all 0.1s;
+  border-left:2px solid transparent;
+  user-select:none;
+}
+.tree-item:hover{background:var(--gh-surface2);color:var(--gh-text);}
+.tree-item.active{
+  color:var(--gh-text);background:rgba(47,129,247,0.1);
+  border-left-color:var(--gh-accent);
+}
+.tree-icon{font-size:13px;flex-shrink:0;opacity:0.7;}
+.tree-item.active .tree-icon{opacity:1;}
+.tree-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tree-badge{
+  font-size:9px;padding:1px 5px;border-radius:20px;flex-shrink:0;
+  background:var(--gh-green-muted);color:var(--gh-green);font-weight:600;
+}
+.tree-section{
+  padding:6px 12px 2px;
+  font-size:10px;color:var(--gh-text-dim);
+  letter-spacing:0.05em;text-transform:uppercase;
+  margin-top:4px;
+}
+
+/* ─── MAIN CONTENT ─── */
+.main{
+  position:fixed;
+  left:var(--sidebar-w);right:0;
+  top:calc(var(--topbar-h) + 40px + 2px);
+  bottom:var(--statusbar-h);
+  overflow:hidden;z-index:10;
+  transition:left 0.2s, top 0.2s, bottom 0.2s, right 0.2s;
+}
+.slides-track{
+  display:flex;width:100%;height:100%;
+  transition:transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.slide{
+  flex:0 0 100%;width:100%;height:100%;
+  overflow-y:auto;
+  padding:32px 40px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gh-border) transparent;
+  }
+
+/* ─── STATUS BAR ─── */
+.statusbar{
+  position:fixed;bottom:0;left:0;right:0;height:var(--statusbar-h);
+  background:var(--gh-accent);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;z-index:200;
+  font-size:11px;font-family:var(--mono);color:#fff;
+}
+.status-left,.status-right{display:flex;align-items:center;gap:12px;}
+.status-branch{display:flex;align-items:center;gap:5px;}
+.status-seg{opacity:0.75;}
+.status-sep{opacity:0.4;}
+
+/* ─── README / CONTENT STYLES ─── */
+.readme{max-width:860px;margin:0 auto;width:100%;}
+
+/* H1, H2, H3 styled like GitHub markdown */
+.readme h1{
+  font-size:clamp(22px,3vw,32px);font-family:var(--sans);font-weight:700;
+  color:var(--gh-text);padding-bottom:12px;border-bottom:1px solid var(--gh-border);
+  margin-bottom:18px;letter-spacing:-0.01em;
+}
+.readme h2{
+  font-size:clamp(16px,2.2vw,22px);font-family:var(--sans);font-weight:600;
+  color:var(--gh-text);padding-bottom:8px;border-bottom:1px solid var(--gh-border-muted);
+  margin:22px 0 12px;
+}
+.readme h3{
+  font-size:14px;font-family:var(--sans);font-weight:600;
+  color:var(--gh-text);margin:16px 0 8px;
+}
+.readme p{
+  font-size:13px;line-height:1.7;color:var(--gh-text-muted);
+  margin-bottom:12px;font-family:var(--sans);
+}
+.readme p strong,.readme li strong{color:var(--gh-text);}
+.readme a{color:var(--gh-accent);text-decoration:none;}
+.readme a:hover{text-decoration:underline;}
+
+/* Inline code */
+.readme code{
+  background:var(--gh-surface2);border:1px solid var(--gh-border);
+  border-radius:4px;padding:1px 6px;
+  font-size:12px;font-family:var(--mono);color:var(--gh-purple);
+}
+
+/* Code block */
+.code-block{
+  background:var(--gh-surface);border:1px solid var(--gh-border);
+  border-radius:6px;margin:12px 0;overflow:hidden;
+}
+.code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;border-bottom:1px solid var(--gh-border);
+  background:var(--gh-surface2);
+}
+.code-lang{font-size:11px;color:var(--gh-text-muted);font-family:var(--mono);}
+.copy-btn{
+  background:transparent;border:1px solid var(--gh-border);
+  border-radius:4px;padding:2px 8px;font-size:11px;
+  color:var(--gh-text-muted);cursor:pointer;font-family:var(--mono);
+  transition:all 0.15s;
+}
+.copy-btn:hover{background:var(--gh-surface2);color:var(--gh-text);}
+.code-body{
+  padding:14px 16px;overflow-x:auto;
+  font-size:12px;line-height:1.7;font-family:var(--mono);color:#e6edf3;
+}
+.code-body .c{color:#8b949e;}
+.code-body .k{color:#ff7b72;}
+.code-body .s{color:#a5d6ff;}
+.code-body .fn{color:#d2a8ff;}
+.code-body .v{color:#79c0ff;}
+.code-body .g{color:#3fb950;}
+
+/* Alert boxes like GitHub */
+.alert{
+  border-left:4px solid;border-radius:0 6px 6px 0;
+  padding:10px 14px;margin:12px 0;
+  display:flex;gap:10px;align-items:flex-start;
+  font-size:12px;font-family:var(--sans);line-height:1.6;
+}
+.alert-note{border-color:var(--gh-accent);background:var(--gh-accent-muted);color:var(--gh-text-muted);}
+.alert-warn{border-color:var(--gh-yellow);background:var(--gh-yellow-muted);color:var(--gh-text-muted);}
+.alert-tip{border-color:var(--gh-green);background:var(--gh-green-muted);color:var(--gh-text-muted);}
+.alert-danger{border-color:var(--gh-red);background:var(--gh-red-muted);color:var(--gh-text-muted);}
+.alert-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.alert strong{color:var(--gh-text);}
+
+/* Table like GitHub */
+.gh-table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--sans);margin:12px 0;}
+.gh-table th{
+  background:var(--gh-surface2);color:var(--gh-text-muted);
+  padding:8px 12px;text-align:left;font-weight:600;font-size:11px;letter-spacing:0.04em;
+  text-transform:uppercase;border:1px solid var(--gh-border);
+}
+.gh-table td{
+  padding:8px 12px;border:1px solid var(--gh-border);
+  color:var(--gh-text-muted);vertical-align:top;line-height:1.5;
+}
+.gh-table td code{font-size:11px;}
+.gh-table tr:hover td{background:var(--gh-surface2);}
+
+/* Badge pills */
+.pill{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-family:var(--mono);font-weight:600;
+  padding:2px 8px;border-radius:20px;border:1px solid;
+  vertical-align:middle;
+}
+.pill-green{color:var(--gh-green);border-color:rgba(63,185,80,0.4);background:var(--gh-green-muted);}
+.pill-blue{color:var(--gh-accent);border-color:rgba(47,129,247,0.4);background:var(--gh-accent-muted);}
+.pill-yellow{color:var(--gh-orange);border-color:rgba(227,179,65,0.4);background:var(--gh-yellow-muted);}
+.pill-purple{color:var(--gh-purple);border-color:rgba(188,140,255,0.3);background:var(--gh-purple-muted);}
+.pill-red{color:var(--gh-red);border-color:rgba(248,81,73,0.3);background:var(--gh-red-muted);}
+
+/* Divider */
+.divider{height:1px;background:var(--gh-border);margin:20px 0;}
+
+/* Lists */
+.readme ul,.readme ol{padding-left:22px;margin:8px 0 12px;}
+.readme li{font-size:13px;font-family:var(--sans);color:var(--gh-text-muted);line-height:1.7;margin-bottom:3px;}
+.readme li code{font-size:11px;}
+
+/* Two-col layout */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;}
+@media(max-width:680px){.two-col{grid-template-columns:1fr;}}
+
+/* Info card (replaces cards component) */
+.info-card{
+  background:var(--gh-surface);border:1px solid var(--gh-border);
+  border-radius:6px;padding:14px 16px;
+}
+.info-card h4{font-size:12px;font-family:var(--sans);font-weight:600;color:var(--gh-text);margin-bottom:6px;}
+.info-card p{font-size:11px;color:var(--gh-text-muted);line-height:1.6;font-family:var(--sans);margin:0;}
+.info-card code{font-size:10px;}
+
+/* Keyboard shortcut hint */
+.kbd-hint{
+  position:fixed;bottom:36px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-family:var(--mono);color:var(--gh-text-muted);
+  z-index:300;animation:fadeHint 5s ease forwards;pointer-events:none;
+}
+.kbd{
+  background:var(--gh-surface2);border:1px solid var(--gh-border);
+  border-radius:4px;padding:1px 6px;font-size:10px;color:var(--gh-text);
+}
+@keyframes fadeHint{0%{opacity:0}10%{opacity:1}70%{opacity:1}100%{opacity:0}}
+
+/* Collapse sidebar */
+.sidebar-toggle{
+  display:none;background:transparent;border:1px solid var(--gh-border);
+  border-radius:4px;width:28px;height:28px;cursor:pointer;
+  align-items:center;justify-content:center;color:var(--gh-text-muted);
+  font-size:14px;transition:all 0.15s;flex-shrink:0;
+}
+.sidebar-toggle:hover{background:var(--gh-surface2);color:var(--gh-text);}
+@media(max-width:900px){
+  .sidebar-toggle{display:flex;}
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main,.progress-bar{left:0!important;}
+  body.sidebar-open::after{
+    content:'';position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;
+  }
+}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--gh-border);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a class="topbar-logo" href="index.html">
+    <svg class="gh-mark" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    <span style="font-size:13px;font-family:var(--sans);">taroon</span>
+  </a>
+  <div class="topbar-breadcrumb">
+    <span class="bc-sep">/</span>
+    <a class="bc-owner" href="index.html">figma-to-code-with-claude</a>
+    <span class="bc-sep">/</span>
+    <span class="bc-repo">developer.md</span>
+    <span class="bc-sep" style="margin-left:8px;"></span>
+    <span class="bc-ref">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+      main
+    </span>
+  </div>
+  <div class="topbar-right">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle file tree">☰</button>
+    <button class="gh-btn" onclick="prevSlide()">← Prev</button>
+    <span style="font-size:11px;font-family:var(--mono);color:var(--gh-text-muted)" id="counter">01/13</span>
+    <button class="gh-btn" onclick="nextSlide()">Next →</button>
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoomOut()" title="Zoom out">−</button>
+      <span class="zoom-level" id="zoom-label" onclick="zoomReset()" title="Reset zoom">100%</span>
+      <button class="zoom-btn" onclick="zoomIn()" title="Zoom in">+</button>
+    </div>
+    <a href="./designer.html" class="gh-btn" style="text-decoration:none;">🎨 Designer</a>
+    <button class="gh-btn primary" onclick="toggleFullscreen()">⛶ Present</button>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tabbar">
+  <a class="tab active" href="#">
+    <span class="tab-icon">📄</span> README
+    <span class="tab-count" id="tab-count">1/13</span>
+  </a>
+  <a class="tab" href="designer.html">
+    <span class="tab-icon">🎨</span> Designer version
+  </a>
+  <a class="tab" href="index.html">
+    <span class="tab-icon">🏠</span> Index
+  </a>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<!-- SIDEBAR FILE TREE -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-section-header">Explorer · figma-to-code</div>
+  <div id="tree-list"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="zoom-wrapper" id="zoom-wrapper"><div class="slides-track" id="slides-track">
+
+    <!-- SLIDE 1: README / Hero -->
+    <div class="slide">
+      <div class="readme">
+        <h1>
+          figma-to-code-with-claude
+          <span class="pill pill-green" style="margin-left:10px;font-size:10px">● live</span>
+          <span class="pill pill-blue" style="margin-left:6px;font-size:10px">March 2026</span>
+        </h1>
+        <p>The complete technical guide to connecting Figma to your codebase via Claude. Setup, MCP config, skills, prompting patterns, and the full bidirectional workflow. No hand-waving. All commands are copy-paste ready.</p>
+
+        <div class="alert alert-note">
+          <span class="alert-icon">ℹ️</span>
+          <span><strong>Developer edition.</strong> This deck is rewritten for engineers and technical designers. For the design-focused version with visual thinking and Figma-first content, see <a href="designer.html">designer.html</a>.</span>
+        </div>
+
+        <h2>Contents</h2>
+        <table class="gh-table">
+          <thead><tr><th>#</th><th>File</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>01</td><td><code>README.md</code></td><td>This file. Overview + navigation.</td></tr>
+            <tr><td>02</td><td><code>setup/install.sh</code></td><td>Claude Code install — native binary, all platforms.</td></tr>
+            <tr><td>03</td><td><code>setup/mcp-config.md</code></td><td>Figma MCP remote setup + authentication.</td></tr>
+            <tr><td>04</td><td><code>setup/figma-prep.md</code></td><td>Structuring Figma files for clean code output.</td></tr>
+            <tr><td>05</td><td><code>workflow/loop.md</code></td><td>The Figma → Claude → Code loop, step by step.</td></tr>
+            <tr><td>06</td><td><code>workflow/prompts.md</code></td><td>Prompt templates. Copy, paste, ship.</td></tr>
+            <tr><td>07</td><td><code>workflow/limits.md</code></td><td>What Claude reliably does and doesn't do.</td></tr>
+            <tr><td>08</td><td><code>reverse/code-to-figma.md</code></td><td>Capture live UI → editable Figma frames. Feb 2026.</td></tr>
+            <tr><td>09</td><td><code>skills/intro.md</code></td><td>Agent skills — architecture and install.</td></tr>
+            <tr><td>10</td><td><code>skills/build.md</code></td><td>Writing SKILL.md from scratch.</td></tr>
+            <tr><td>11</td><td><code>skills/registry.md</code></td><td>Taroon Tyagi's curated skill stack.</td></tr>
+            <tr><td>12</td><td><code>tools/console-mcp.md</code></td><td>figma-console-mcp — 56+ tools, plugin debug.</td></tr>
+            <tr><td>13</td><td><code>CHANGELOG.md</code></td><td>Key resources + closing notes.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-tip">
+          <span class="alert-icon">💡</span>
+          <span>Click any file in the sidebar to jump directly. Use <kbd class="kbd">←</kbd> <kbd class="kbd">→</kbd> arrow keys or the toolbar buttons to navigate. <kbd class="kbd">F</kbd> for fullscreen.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Install -->
+    <div class="slide">
+      <div class="readme">
+        <h1>setup/install.sh</h1>
+        <p>Claude Code native binary. No Node.js dependency. Auto-updates in background. <a href="https://code.claude.com/docs/en/setup" target="_blank">Official docs ↗</a></p>
+
+        <div class="alert alert-danger">
+          <span class="alert-icon">🚫</span>
+          <span><strong>npm install is deprecated.</strong> <code>npm install -g @anthropic-ai/claude-code</code> still works but won't auto-update and requires Node.js. Use the native installer below.</span>
+        </div>
+
+        <h2>macOS / Linux</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Native installer — fastest path, no deps</span>
+curl -fsSL https://claude.ai/install.sh | bash
+
+<span class="c"># Verify</span>
+claude --version</div>
+        </div>
+
+        <h2>macOS via Homebrew</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">brew install claude-code
+
+<span class="c"># Homebrew does NOT auto-update — run periodically:</span>
+brew upgrade claude-code</div>
+        </div>
+
+        <h2>Windows (PowerShell)</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">powershell</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Requires Git for Windows — install first from git-scm.com</span>
+<span class="c"># Then run in PowerShell (not CMD):</span>
+winget install Anthropic.ClaudeCode
+
+<span class="c"># Or native installer:</span>
+irm https://claude.ai/install.ps1 | iex</div>
+        </div>
+
+        <h2>Authentication</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># First run — opens browser for OAuth</span>
+claude
+
+<span class="c"># Or set API key directly (for CI/CD)</span>
+export ANTHROPIC_API_KEY=sk-ant-...</div>
+        </div>
+
+        <div class="alert alert-warn">
+          <span class="alert-icon">⚠️</span>
+          <span><strong>Requires a paid plan.</strong> Claude Pro ($20/mo) or Max ($100+/mo). No free tier for Claude Code. API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> also works — pay per token.</span>
+        </div>
+
+        <div class="alert alert-tip">
+          <span class="alert-icon">🩺</span>
+          <span>Run <code>claude doctor</code> after install to verify connectivity, auth status, and installation type.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: MCP Config -->
+    <div class="slide">
+      <div class="readme">
+        <h1>setup/mcp-config.md</h1>
+        <p>Connect Claude Code to Figma via the official Remote MCP server. <a href="https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/" target="_blank">Figma docs ↗</a></p>
+
+        <h2>Option A — Official Figma Plugin (recommended)</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Installs MCP + Agent Skills in one shot</span>
+claude plugin install figma@claude-plugins-official
+
+<span class="c"># Verify</span>
+/mcp</div>
+        </div>
+
+        <h2>Option B — Manual Remote MCP</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Add for current project only</span>
+claude mcp add --transport http figma https://mcp.figma.com/mcp
+
+<span class="c"># Add globally (recommended — available in all projects)</span>
+claude mcp add --scope user --transport http figma https://mcp.figma.com/mcp
+
+<span class="c"># Authenticate</span>
+<span class="c"># Type /mcp in Claude → select figma → Authenticate → Allow Access</span></div>
+        </div>
+
+        <h2>Option C — Desktop MCP (local, offline-friendly)</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Requires Figma Desktop app</span>
+<span class="c"># Figma menu → Preferences → Enable Dev Mode MCP Server</span>
+<span class="c"># Server runs at:</span>
+http://127.0.0.1:3845/sse
+
+<span class="c"># Connect Claude Code to it:</span>
+claude mcp add --transport sse figma-local http://127.0.0.1:3845/sse</div>
+        </div>
+
+        <h2>Verify connection</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># In Claude Code — shows all connected MCP servers</span>
+/mcp
+
+<span class="c"># Should show: figma ● connected</span></div>
+        </div>
+
+        <div class="alert alert-warn">
+          <span class="alert-icon">⚠️</span>
+          <span><strong>Free plan limit:</strong> ~6 MCP tool calls/month with the official server. For real usage, upgrade to Figma Professional. Alternatively use the community <a href="https://github.com/southleft/figma-console-mcp" target="_blank">figma-console-mcp</a> which has no such cap.</span>
+        </div>
+
+        <h2>claude.json / mcp config location</h2>
+        <table class="gh-table">
+          <thead><tr><th>Client</th><th>macOS path</th><th>Windows path</th></tr></thead>
+          <tbody>
+            <tr><td>Claude Code CLI</td><td><code>~/.claude.json</code></td><td><code>%USERPROFILE%\.claude.json</code></td></tr>
+            <tr><td>Claude Desktop</td><td><code>~/Library/Application Support/Claude/claude_desktop_config.json</code></td><td><code>%APPDATA%\Claude\claude_desktop_config.json</code></td></tr>
+            <tr><td>Cursor</td><td><code>~/.cursor/mcp.json</code></td><td><code>%USERPROFILE%\.cursor\mcp.json</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Figma Prep -->
+    <div class="slide">
+      <div class="readme">
+        <h1>setup/figma-prep.md</h1>
+        <p>Garbage in, garbage out. How you structure your Figma file directly determines code quality. Claude reads layer names, variant properties, Auto Layout constraints, and Variables — not pixels.</p>
+
+        <h2>Layer naming</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">figma</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Bad — Claude has to guess</span>
+Frame 1234 / Rectangle / Group 3
+
+<span class="c"># Good — Claude infers component hierarchy</span>
+Button/Primary/Large
+Card/Product/Default
+Nav/TopBar/Authenticated</div>
+        </div>
+
+        <h2>Component variants → code props</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">figma → react</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c">// Figma variant properties:</span>
+<span class="v">variant</span>=primary | ghost | destructive
+<span class="v">size</span>=sm | md | lg
+<span class="v">state</span>=default | hover | disabled
+
+<span class="c">// Maps directly to typed React props:</span>
+<span class="k">interface</span> <span class="fn">ButtonProps</span> {
+  variant: <span class="s">'primary'</span> | <span class="s">'ghost'</span> | <span class="s">'destructive'</span>
+  size: <span class="s">'sm'</span> | <span class="s">'md'</span> | <span class="s">'lg'</span>
+  disabled?: <span class="k">boolean</span>
+}</div>
+        </div>
+
+        <h2>Auto Layout = flexbox</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">figma → css</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c">/* Auto Layout (horizontal, gap 8) → */</span>
+.component {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+<span class="c">/* Manual absolute positioning → position:absolute soup */</span>
+<span class="c">/* Don't do this in Figma. Seriously. */</span></div>
+        </div>
+
+        <h2>Figma Variables → Design Tokens</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Export Variables as JSON from Figma → Plugins → Variables to JSON</span>
+<span class="c"># Then ask Claude:</span>
+<span class="s">"Convert this variables JSON to CSS custom properties and a JS token file"</span>
+
+<span class="c"># Result: tokens/index.ts, tokens/variables.css</span>
+<span class="c"># Claude will reference these in all generated components</span></div>
+        </div>
+
+        <div class="alert alert-tip">
+          <span class="alert-icon">🔗</span>
+          <span>Use <a href="https://www.figma.com/dev-mode/" target="_blank">Code Connect ↗</a> to link Figma components to your actual codebase components. Claude will reference your real component paths instead of generating new ones from scratch.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Workflow -->
+    <div class="slide">
+      <div class="readme">
+        <h1>workflow/loop.md</h1>
+        <p>The full Figma → Claude → Code loop. Each step is atomic — you can enter at any point.</p>
+
+        <h2>Step 1: Get the Figma node URL</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">figma</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Right-click any frame or component → Copy link</span>
+<span class="c"># Node-specific URL format:</span>
+https://figma.com/design/FILE_KEY/NAME?node-id=NODE_ID
+
+<span class="c"># NODE_ID is the key — it points Claude to the exact component</span>
+<span class="c"># Whole-page URLs are too noisy. Always use node-specific links.</span></div>
+        </div>
+
+        <h2>Step 2: Paste in Claude Code with context</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">Implement the ProductCard component from this Figma link:
+https://figma.com/design/abc123/DS?node-id=4-23
+
+Stack: Next.js 15, Tailwind CSS, TypeScript
+Tokens: /tokens/index.ts
+Follow patterns in: /components/Card.tsx
+Props needed: title, price, imageUrl, badge?: string
+Add hover elevation matching the hover variant in Figma
+ARIA-compliant. Include a Storybook story for all variants.</div>
+        </div>
+
+        <h2>Step 3: Claude reads via MCP</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">output</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Claude fetches from mcp.figma.com/mcp:</span>
+<span class="c"># - Node dimensions, fills, border-radius</span>
+<span class="c"># - Auto Layout constraints → flexbox rules</span>
+<span class="c"># - Typography styles → font-size, weight, line-height</span>
+<span class="c"># - Variant properties → TypeScript interface</span>
+<span class="c"># - Variable bindings → token references</span>
+<span class="c"># Then writes: components/ProductCard.tsx + ProductCard.stories.tsx</span></div>
+        </div>
+
+        <h2>Step 4: Design updated?</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">The ProductCard design was updated — new padding and a new "sold out"
+state was added. Updated Figma link:
+https://figma.com/design/abc123/DS?node-id=4-23
+
+Diff the current /components/ProductCard.tsx against the
+new design and apply only the changed properties. Don't
+regenerate the whole component.</div>
+        </div>
+
+        <div class="alert alert-tip">
+          <span class="alert-icon">🏗️</span>
+          <span><strong>Selection-based mode:</strong> In Figma Desktop, select a frame, then prompt Claude Code. It reads your current Figma selection automatically — more precise than pasting links for complex nested components.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Prompts -->
+    <div class="slide">
+      <div class="readme">
+        <h1>workflow/prompts.md</h1>
+        <p>Copy-paste prompt templates. Adapt the paths and stack specifics to your project.</p>
+
+        <h2>Component from Figma</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">prompt template</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">Implement [COMPONENT_NAME] from [FIGMA_URL] as a React component.
+
+Stack: [YOUR_STACK]
+Tokens: [TOKEN_FILE_PATH]
+Pattern reference: [EXISTING_COMPONENT_PATH]
+Props: [LIST_PROPS]
+
+Requirements:
+- Match all Figma variant states (hover, focus, disabled)
+- Keyboard navigable, ARIA-labelled
+- No inline styles, no hardcoded values
+- Export a Storybook story for each variant
+- TypeScript strict mode</div>
+        </div>
+
+        <h2>Token extraction</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">prompt template</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">Extract all design tokens from [FIGMA_URL].
+
+Output three files:
+1. tokens/variables.css — CSS custom properties
+2. tokens/index.ts — typed JS token object
+3. tokens/tailwind.ts — Tailwind theme extension
+
+Group by: color, spacing, typography, radius, shadow.
+Use kebab-case for CSS vars, camelCase for JS keys.</div>
+        </div>
+
+        <h2>Iterative update</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">prompt template</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">The design for [COMPONENT] changed. Updated link: [FIGMA_URL]
+
+Read the current [FILE_PATH] and apply only the visual
+changes. Preserve all logic, state management, event
+handlers, and prop interfaces. Output a minimal diff.</div>
+        </div>
+
+        <h2>What makes a prompt fail</h2>
+        <table class="gh-table">
+          <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>Whole-page Figma URL</td><td>Use node-specific URL (<code>?node-id=X-Y</code>)</td></tr>
+            <tr><td>No stack context</td><td>Specify framework + CSS approach</td></tr>
+            <tr><td>No token reference</td><td>Point to your actual token file</td></tr>
+            <tr><td>12 components at once</td><td>One component per conversation</td></tr>
+            <tr><td>No pattern reference</td><td>Link to an existing similar component</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Limits -->
+    <div class="slide">
+      <div class="readme">
+        <h1>workflow/limits.md</h1>
+        <p>Accurate model of what Claude does and doesn't do well. Set expectations before the demo.</p>
+
+        <h2>Reliable</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">✓ works well</span></div>
+          <div class="code-body">✓ Component generation from well-structured Figma files
+✓ Token extraction → CSS custom properties, JS/TS
+✓ Auto Layout → flexbox/grid with correct constraints
+✓ Variant properties → TypeScript interfaces
+✓ Hover/focus/disabled states from Figma variants
+✓ Storybook story generation for all variants
+✓ Iterative updates — diff and patch, not full regen
+✓ ARIA roles and keyboard navigation
+✓ Tailwind, CSS Modules, styled-components — all work</div>
+        </div>
+
+        <h2>Won't work / needs workarounds</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">✗ known limits</span></div>
+          <div class="code-body">✗ Unnamed layers (Frame 1234) — Claude reads layer names as
+  component hierarchy. "Frame 1234" gives it nothing to infer from.
+✗ Business logic — Claude sees your UI, not your data model,
+  API contracts, or state management. Wire those yourself.
+✗ Multi-screen flows in one shot — context fills up fast.
+  One component or one screen per conversation.
+✗ Lottie / After Effects animation export — no render pipeline.
+✗ 100% production-ready on first pass — treat output as a
+  strong first draft. Always review before merging.
+✗ Mind-reading: vague prompts = vague output. Always will be.</div>
+        </div>
+
+        <div class="alert alert-note">
+          <span class="alert-icon">ℹ️</span>
+          <span>The #1 misconception: <em>"paste the Figma link and it builds the app."</em> Claude is a precision tool, not a magic wand. Quality of output is a direct function of quality of Figma structure + quality of prompt. — <strong>Taroon Tyagi</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Code → Figma -->
+    <div class="slide">
+      <div class="readme">
+        <h1>workflow/code-to-figma.md <span class="pill pill-yellow" style="font-size:10px;margin-left:8px">Feb 2026</span></h1>
+        <p>Capture live UI from your running app directly into editable Figma frames. <a href="https://www.figma.com/blog/introducing-claude-code-to-figma/" target="_blank">Figma blog post ↗</a></p>
+
+        <h2>Capture running app → Figma</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># 1. Run your app locally</span>
+npm run dev
+
+<span class="c"># 2. In Claude Code, ask it to capture and send to Figma:</span>
+<span class="s">"Capture the current state of localhost:3000/dashboard
+and send it to my Figma file [FIGMA_URL] as a new frame
+named 'Dashboard - Captured [date]'"</span>
+
+<span class="c"># Result: editable Figma frame, not a flat image</span>
+<span class="c"># Teams can annotate, fork, compare against spec</span></div>
+        </div>
+
+        <h2>Token sync: code → Figma Variables</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Export tokens as JSON</span>
+npx token-transformer tokens/index.ts tokens/output.json
+
+<span class="c"># Ask Claude to push to Figma Variables via REST API</span>
+<span class="s">"Convert tokens/output.json to Figma Variables format
+and push to file [FILE_KEY] via the Figma REST API.
+Use FIGMA_TOKEN env var for auth."</span></div>
+        </div>
+
+        <h2>The bidirectional loop</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">workflow</span></div>
+          <div class="code-body">1. Build in Claude Code ────────────────► localhost:3000
+2. Capture to Figma ─────────────────► Editable frames
+3. Team reviews on canvas ───────────► Annotations, forks
+4. Designers refine in Figma ────────► Updated spec
+5. Pull back via MCP ────────────────► Claude Code
+6. Iterate ──────────────────────────► Repeat</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Skills Intro -->
+    <div class="slide">
+      <div class="readme">
+        <h1>skills/intro.md</h1>
+        <p>Agent skills are modular instruction sets that extend Claude's behaviour. A skill = a <code>SKILL.md</code> file. <a href="https://code.claude.com/docs/en/skills" target="_blank">Official docs ↗</a> · <a href="https://skills.sh" target="_blank">skills.sh ↗</a></p>
+
+        <h2>How skills load — why this matters for context</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">loading order</span></div>
+          <div class="code-body">Startup:   name + description loaded (~100 tokens each)
+On match:  full SKILL.md body loaded into context
+On demand: references/ files loaded only if task needs them
+Scripts:   scripts/ files executed via bash — only output consumed
+
+Result: install 50 skills — zero context penalty until triggered.
+Why it matters: Claude has a fixed context window. Skills that
+load lazily mean you get broad capability without burning tokens
+on instructions Claude doesn't need for your current task.</div>
+        </div>
+
+        <h2>Install</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Install a skill (auto-detects Claude Code, Cursor, Codex, etc.)</span>
+npx skills add anthropics/skills@frontend-design
+
+<span class="c"># Install to Claude Code specifically</span>
+npx skills add vercel-labs/agent-skills -a claude-code
+
+<span class="c"># --scope user = available in ALL your projects (recommended)</span>
+<span class="c"># default (no flag) = current project only (.claude/skills/)</span>
+
+<span class="c"># List installed</span>
+npx skills list
+
+<span class="c"># Update all</span>
+npx skills update
+
+<span class="c"># Invoke by slash command</span>
+/frontend-design</div>
+        </div>
+
+        <h2>Skill install locations</h2>
+        <table class="gh-table">
+          <thead><tr><th>Scope</th><th>Path</th><th>When to use</th></tr></thead>
+          <tbody>
+            <tr><td>Personal</td><td><code>~/.claude/skills/</code></td><td>Your workflow, all projects</td></tr>
+            <tr><td>Project</td><td><code>.claude/skills/</code></td><td>Team-shared, commit to git</td></tr>
+            <tr><td>Plugin</td><td>Via <code>claude plugin install</code></td><td>Official marketplace skills</td></tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-note">
+          <span class="alert-icon">ℹ️</span>
+          <span><strong>Skills vs MCP:</strong> MCP gives Claude new <em>tools</em> (APIs, databases, file access). Skills give Claude new <em>expertise</em> (how to use those tools, domain standards, review protocols). Use both.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Build a skill -->
+    <div class="slide">
+      <div class="readme">
+        <h1>skills/build.md</h1>
+        <p>A skill is a directory with one required file: <code>SKILL.md</code>. Everything else is optional.</p>
+
+        <h2>File structure</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">tree</span></div>
+          <div class="code-body">my-skill/
+├── SKILL.md           <span class="c"># Required. Frontmatter + instructions.</span>
+├── scripts/           <span class="c"># Python/Bash. Executed via bash, only output consumed.</span>
+│   └── analyze.py
+├── references/        <span class="c"># Docs. Loaded on-demand when task references them.</span>
+│   └── design-tokens.md
+└── assets/            <span class="c"># Templates, icons, fonts.</span>
+    └── report.docx</div>
+        </div>
+
+        <h2>SKILL.md structure</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">yaml + markdown</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">---
+name: design-review
+description: >
+  Use this skill when asked for a design review, UI critique,
+  accessibility audit, or visual feedback on any component or
+  screen. Triggers on "review this", "how does this look",
+  "accessibility check", or any UI feedback request.
+---
+
+## Design Review Protocol
+
+When reviewing UI, always check in this order:
+
+1. **Contrast** — WCAG AA minimum (4.5:1 text, 3:1 UI components)
+2. **Touch targets** — 44×44px minimum on interactive elements
+3. **Spacing** — consistency with token scale (see references/tokens.md)
+4. **Motion** — all transitions must respect prefers-reduced-motion
+5. **Focus** — visible focus ring on all interactive elements
+
+Output format: severity-tagged list
+- 🔴 CRITICAL — blocks shipping
+- 🟡 WARN — should fix before release
+- 🟢 OK — no action needed</div>
+        </div>
+
+        <div class="alert alert-warn">
+          <span class="alert-icon">⚠️</span>
+          <span><strong>Description is the trigger.</strong> Claude matches tasks to skills using the description field only. Be explicit and slightly over-specify. Undertriggering is the #1 failure mode. Test with 20 prompts — half should trigger, half shouldn't. Aim for &gt;80% precision.</span>
+        </div>
+
+        <h2>Auto-generate with skill-creator</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Install skill-creator first</span>
+npx skills add anthropics/skills --skill skill-creator
+
+<span class="c"># Then in Claude Code:</span>
+/skill-creator
+
+<span class="c"># Claude will: interview you → draft SKILL.md → run 20 evals</span>
+<span class="c"># → iterate until trigger accuracy &gt;80% → package for distribution</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Skills Registry -->
+    <div class="slide">
+      <div class="readme">
+        <h1>skills/registry.md</h1>
+        <p>Taroon Tyagi's curated skill stack for design-to-code workflows. All install commands are copy-paste ready.</p>
+
+        <h2>Official — <a href="https://github.com/anthropics/skills" target="_blank">anthropics/skills ★87k ↗</a></h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Production-grade UI code. Avoids generic AI aesthetics. 277k installs.</span>
+npx skills add anthropics/skills@frontend-design
+
+<span class="c"># Meta-skill: interview-driven SKILL.md creation with eval loop.</span>
+npx skills add anthropics/skills --skill skill-creator</div>
+        </div>
+
+        <h2>Taroon Tyagi's stack</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># UX audits, IA, interaction design, conversion-focused decisions</span>
+npx skills add nextlevelbuilder/ui-ux-pro-max-skill@ui-ux-pro-max
+
+<span class="c"># Vercel visual + UX principles — layout rhythm, spacing, type hierarchy</span>
+npx skills add vercel-labs/agent-skills@web-design-guidelines
+
+<span class="c"># shadcn/ui specialist — correct variants, Tailwind, Radix composition</span>
+npx skills add giuseppe-trisciuoglio/developer-kit@shadcn-ui
+
+<span class="c"># WCAG 2.2 auditing — contrast, keyboard nav, ARIA, focus management</span>
+npx skills add supercent-io/skills-template@web-accessibility</div>
+        </div>
+
+        <h2>Design Agent Lab — <a href="https://designagentlab.com" target="_blank">designagentlab.com ↗</a></h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># claude-to-figma: reads your Figma file once, saves as</span>
+<span class="c"># FIGMA_COMPONENTS_LIBRARY.md + FIGMA_PATTERNS.md.</span>
+<span class="c"># Attach to any future session — no live MCP needed.</span>
+
+<span class="c"># Usage: paste into Claude</span>
+Read and follow: <span class="s">raw.githubusercontent.com/designagentlab/skills/main/claude-to-figma/SKILL.md</span></div>
+        </div>
+
+        <h2>Discover more</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Search skills.sh — npm registry for skills</span>
+<span class="c"># Every skill has a security audit report</span>
+npx skills find "react"
+npx skills find "accessibility"
+npx skills find "design system"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Console MCP -->
+    <div class="slide">
+      <div class="readme">
+        <h1>tools/console-mcp.md <span class="pill pill-purple" style="font-size:10px;margin-left:8px">★ 436</span></h1>
+        <p>Community-built MCP server by <a href="https://southleft.com" target="_blank">southleft</a>. 56+ tools vs 16 in the official remote-only MCP. Use alongside the official one. <a href="https://github.com/southleft/figma-console-mcp" target="_blank">GitHub ↗</a> · <a href="https://docs.figma-console-mcp.southleft.com" target="_blank">Docs ↗</a></p>
+
+        <h2>Install (NPX — full 56+ tools)</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body"><span class="c"># Get your Figma Personal Access Token from:</span>
+<span class="c"># figma.com/developers/api#access-tokens (starts with figd_)</span>
+
+claude mcp add figma-console -s user \
+  -e FIGMA_ACCESS_TOKEN=figd_YOUR_TOKEN_HERE \
+  -e ENABLE_MCP_APPS=true \
+  -- npx -y figma-console-mcp@latest</div>
+        </div>
+
+        <h2>Read-only explore (no token needed)</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">claude mcp add figma-console -s user \
+  -- npx -y mcp-remote@latest \
+  https://figma-console-mcp.southleft.com/sse
+
+<span class="c"># Note: remote SSE = read-only, 21 tools only</span>
+<span class="c"># NPX = full write access, 56+ tools, MCP Apps</span></div>
+        </div>
+
+        <h2>Tools comparison</h2>
+        <table class="gh-table">
+          <thead><tr><th>Capability</th><th>Official MCP</th><th>figma-console-mcp</th></tr></thead>
+          <tbody>
+            <tr><td>Read design data</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Create components/frames</td><td>✗</td><td>✓ <code>figma_execute</code></td></tr>
+            <tr><td>Variable CRUD</td><td>✗</td><td>✓ batch 100/call</td></tr>
+            <tr><td>Plugin console logs</td><td>✗</td><td>✓ real-time stream</td></tr>
+            <tr><td>Design-code parity check</td><td>✗</td><td>✓ scored diff</td></tr>
+            <tr><td>Token Browser (MCP App)</td><td>✗</td><td>✓ inline UI</td></tr>
+            <tr><td>Design System Dashboard</td><td>✗</td><td>✓ 0-100 scorecard</td></tr>
+            <tr><td>Free plan</td><td>~6 calls/mo</td><td>No limit (NPX)</td></tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-warn">
+          <span class="alert-icon">⚠️</span>
+          <span>Full write capabilities require the <strong>Desktop Bridge plugin</strong> installed in Figma Desktop. Plugins → Development → Import plugin from manifest → select <code>figma-desktop-bridge/manifest.json</code>.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: Changelog / Resources -->
+    <div class="slide">
+      <div class="readme">
+        <h1>CHANGELOG.md</h1>
+        <p>Key milestones, resources, and credits.</p>
+
+        <h2>Recent changes</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">changelog</span></div>
+          <div class="code-body"><span class="g">## Feb 2026 — Code → Figma officially launched</span>
+Capture live UI to editable Figma frames via Claude Code.
+Figma blog: figma.com/blog/introducing-claude-code-to-figma/
+
+<span class="g">## Jan 2026 — Agent Skills open standard</span>
+Vercel launches skills.sh + npx skills ecosystem.
+Cross-platform: Claude Code, Cursor, Codex, Gemini CLI, 35+ more.
+
+<span class="g">## 2025 — Claude Code native binary</span>
+npm install deprecated. curl | bash installs no-dep binary.
+Auto-updates in background.
+
+<span class="g">## 2025 — Figma Remote MCP</span>
+mcp.figma.com/mcp — no Figma Desktop app required.
+Two modes: remote (browser) + desktop (local/offline).</div>
+        </div>
+
+        <h2>All resources</h2>
+        <table class="gh-table">
+          <thead><tr><th>Resource</th><th>URL</th></tr></thead>
+          <tbody>
+            <tr><td>Figma MCP Guide</td><td><a href="https://help.figma.com/hc/en-us/articles/32132100833559" target="_blank">help.figma.com ↗</a></td></tr>
+            <tr><td>Remote MCP Setup</td><td><a href="https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/" target="_blank">developers.figma.com ↗</a></td></tr>
+            <tr><td>Claude Code Install</td><td><a href="https://code.claude.com/docs/en/setup" target="_blank">code.claude.com ↗</a></td></tr>
+            <tr><td>Agent Skills Docs</td><td><a href="https://code.claude.com/docs/en/skills" target="_blank">code.claude.com/skills ↗</a></td></tr>
+            <tr><td>skills.sh directory</td><td><a href="https://skills.sh" target="_blank">skills.sh ↗</a></td></tr>
+            <tr><td>anthropics/skills</td><td><a href="https://github.com/anthropics/skills" target="_blank">github.com/anthropics/skills ↗</a></td></tr>
+            <tr><td>vercel-labs/agent-skills</td><td><a href="https://github.com/vercel-labs/agent-skills" target="_blank">github.com/vercel-labs ↗</a></td></tr>
+            <tr><td>figma-console-mcp</td><td><a href="https://github.com/southleft/figma-console-mcp" target="_blank">github.com/southleft ↗</a></td></tr>
+            <tr><td>claude-to-figma skill</td><td><a href="https://github.com/designagentlab/skills/tree/main/claude-to-figma" target="_blank">github.com/designagentlab ↗</a></td></tr>
+            <tr><td>Code→Figma blog</td><td><a href="https://www.figma.com/blog/introducing-claude-code-to-figma/" target="_blank">figma.com/blog ↗</a></td></tr>
+          </tbody>
+        </table>
+
+        <div class="divider"></div>
+        <p style="font-size:12px;font-family:var(--mono);color:var(--gh-text-muted)">Built by <strong style="color:var(--gh-text)">Taroon Tyagi</strong> · Principal Designer · March 2026 · No Keynote was harmed.</p>
+      </div>
+    </div>
+
+  </div><!-- /slides-track --></div><!-- /zoom-wrapper -->
+</div><!-- /main -->
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="status-left">
+    <span class="status-branch">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.492 2.492 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25z"/></svg>
+      main
+    </span>
+    <span class="status-sep">|</span>
+    <span class="status-seg" id="status-file">README.md</span>
+  </div>
+  <div class="status-right">
+    <span class="status-seg">← → · ⌘+/− zoom · \ panels · P focus · F fullscreen</span>
+    <span class="status-sep">|</span>
+    <span>Taroon Tyagi</span>
+    <span class="status-sep">|</span>
+    <span id="status-zoom">100%</span>
+  </div>
+</div>
+
+<div class="focus-hint" id="focus-hint">
+  <span style="color:var(--gh-accent);font-weight:700">Focus Mode</span>
+  <span style="color:var(--gh-text-muted)">·</span>
+  <kbd>←</kbd><kbd>→</kbd> navigate
+  <span style="color:var(--gh-text-muted)">·</span>
+  <kbd>P</kbd> or <kbd>Esc</kbd> exit
+</div>
+
+<div class="kbd-hint">
+  <kbd class="kbd">←</kbd><kbd class="kbd">→</kbd> navigate &nbsp;
+  <kbd class="kbd">\</kbd> panels &nbsp;
+  <kbd class="kbd">P</kbd> focus &nbsp;
+  <kbd class="kbd">⌘+/−</kbd> zoom
+</div>
+
+<script>
+  // ── ZOOM SYSTEM ────────────────────────────────────────────────────────────
+  const ZOOM_STEPS = [50, 67, 75, 90, 100, 110, 125, 150, 175, 200];
+  let zoomIndex = ZOOM_STEPS.indexOf(100);
+  let isFocusMode = false;
+  const zoomWrapper = document.getElementById('zoom-wrapper');
+
+  function applyZoom() {
+    const z = ZOOM_STEPS[zoomIndex] / 100;
+    zoomWrapper.style.transform = `scale(${z})`;
+    const label = ZOOM_STEPS[zoomIndex] + '%';
+    document.getElementById('zoom-label').textContent = label;
+    document.getElementById('status-zoom').textContent = label;
+  }
+
+  function zoomIn()    { if (isFocusMode) return; if (zoomIndex < ZOOM_STEPS.length-1) { zoomIndex++; applyZoom(); } }
+  function zoomOut()   { if (isFocusMode) return; if (zoomIndex > 0) { zoomIndex--; applyZoom(); } }
+  function zoomReset() { if (isFocusMode) return; zoomIndex = ZOOM_STEPS.indexOf(100); applyZoom(); }
+
+  // Ctrl/Cmd + scroll to zoom
+  document.querySelector('.main').addEventListener('wheel', e => {
+    if (e.ctrlKey || e.metaKey) { e.preventDefault(); e.deltaY < 0 ? zoomIn() : zoomOut(); }
+  }, { passive: false });
+
+  // ── FOCUS MODE ─────────────────────────────────────────────────────────────
+  function computeFitScale() {
+    const slide = document.querySelectorAll('.slide')[current];
+    if (!slide) return 1;
+    // Use natural content size, not current rendered size which is viewport-dependent
+    const readme = slide.querySelector('.readme');
+    const contentW = readme ? readme.scrollWidth  : slide.scrollWidth;
+    const contentH = readme ? readme.scrollHeight : slide.scrollHeight;
+    const pad = 60;
+    const vw = window.innerWidth  - pad * 2;
+    const vh = window.innerHeight - pad * 2;
+    const scale = Math.min(vw / contentW, vh / contentH, 2);
+    return +Math.max(scale, 0.25).toFixed(4);
+  }
+
+  function applyFitZoom() {
+    const s = computeFitScale();
+    zoomWrapper.style.transform = `scale(${s})`;
+    const pct = Math.round(s * 100) + '%';
+    document.getElementById('zoom-label').textContent = pct;
+    document.getElementById('status-zoom').textContent = pct;
+  }
+
+  function enterFocusMode() {
+    isFocusMode = true;
+    document.body.classList.remove('panels-hidden');
+    document.body.classList.add('focus-mode');
+    // Wait two frames — one for CSS to apply, one for layout reflow
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      applyFitZoom();
+    }));
+  }
+
+  function exitFocusMode() {
+    isFocusMode = false;
+    document.body.classList.remove('focus-mode');
+    applyZoom();
+  }
+
+  function toggleFocusMode() { isFocusMode ? exitFocusMode() : enterFocusMode(); }
+
+  window.addEventListener('resize', () => { if (isFocusMode) applyFitZoom(); });
+
+
+const slideData = [
+  { file:'README.md',               section:''        },
+  { file:'setup/install.sh',        section:'setup'   },
+  { file:'setup/mcp-config.md',     section:'setup'   },
+  { file:'setup/figma-prep.md',     section:'setup'   },
+  { file:'workflow/loop.md',        section:'workflow' },
+  { file:'workflow/prompts.md',     section:'workflow' },
+  { file:'workflow/limits.md',      section:'workflow' },
+  { file:'workflow/code-to-figma.md', section:'workflow' },
+  { file:'skills/intro.md',         section:'skills'  },
+  { file:'skills/build.md',         section:'skills'  },
+  { file:'skills/registry.md',      section:'skills'  },
+  { file:'tools/console-mcp.md',    section:'tools'   },
+  { file:'CHANGELOG.md',            section:''        },
+];
+
+const total = slideData.length;
+let current = 0;
+
+const track = document.getElementById('slides-track');
+const treeList = document.getElementById('tree-list');
+
+// Build file tree grouped by section
+const sections = {};
+slideData.forEach((s, i) => {
+  if (!sections[s.section]) sections[s.section] = [];
+  sections[s.section].push({ ...s, index: i });
+});
+
+const fileIcon = f => f.endsWith('.sh') ? '📜' : '📄';
+
+// treeItems[slideIndex] = the DOM element for that slide — direct map, no index confusion
+const treeItems = [];
+
+Object.entries(sections).forEach(([sec, files]) => {
+  if (sec !== '') {
+    const sh = document.createElement('div');
+    sh.className = 'tree-section';
+    sh.textContent = sec + '/';
+    treeList.appendChild(sh);
+  }
+  files.forEach(({ file, index }) => {
+    const name = file.split('/').pop();
+    const item = document.createElement('div');
+    item.className = 'tree-item';
+    item.style.paddingLeft = sec === '' ? '12px' : '22px';
+    // Store icon and name as children — never use innerHTML+= after this
+    const icon = document.createElement('span');
+    icon.className = 'tree-icon';
+    icon.textContent = fileIcon(file);
+    const label = document.createElement('span');
+    label.className = 'tree-name';
+    label.textContent = name;
+    const badge = document.createElement('span');
+    badge.className = 'tree-badge';
+    badge.textContent = 'active';
+    badge.style.display = 'none';
+    item.append(icon, label, badge);
+    item.addEventListener('click', () => goTo(index));
+    treeList.appendChild(item);
+    treeItems[index] = item; // keyed by slide index — no DOM order confusion
+  });
+});
+
+function goTo(n) {
+  n = parseInt(n, 10); if (isNaN(n)) return;
+  n = Math.max(0, Math.min(total - 1, n));
+  if (n !== current) {
+    const slides = document.querySelectorAll('.slide');
+    if (slides[current]) slides[current].scrollTop = 0;
+  }
+  current = n;
+  track.style.transform = `translateX(${-current * 100}%)`;
+
+  // Update tree using the direct treeItems map
+  treeItems.forEach((el, i) => {
+    const isActive = i === current;
+    el.classList.toggle('active', isActive);
+    el.querySelector('.tree-badge').style.display = isActive ? '' : 'none';
+  });
+
+  const label = `${String(current+1).padStart(2,'0')}/${String(total).padStart(2,'0')}`;
+  document.getElementById('counter').textContent = label;
+  document.getElementById('tab-count').textContent = label;
+  document.getElementById('progress').style.width = `${((current+1)/total*100).toFixed(1)}%`;
+  document.getElementById('status-file').textContent = slideData[current].file;
+  treeItems[current]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  if (isFocusMode) setTimeout(() => requestAnimationFrame(applyFitZoom), 50);
+}
+
+function nextSlide() { goTo(current + 1); }
+function prevSlide() { goTo(current - 1); }
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.body.classList.toggle('sidebar-open');
+}
+
+// Copy code blocks
+function copyCode(btn) {
+  const code = btn.closest('.code-block').querySelector('.code-body').innerText;
+  navigator.clipboard?.writeText(code.trim());
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','ArrowDown'].includes(e.key)) { e.preventDefault(); nextSlide(); }
+  if (['ArrowLeft','ArrowUp'].includes(e.key)) { e.preventDefault(); prevSlide(); }
+  if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+  if (e.key >= '1' && e.key <= '9') goTo(parseInt(e.key) - 1);
+  // Zoom
+  if ((e.key === '=' || e.key === '+') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); zoomIn(); }
+  if (e.key === '-' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); zoomOut(); }
+  if (e.key === '0' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); zoomReset(); }
+  // \ — toggle all panels
+  if (e.key === '\\') { e.preventDefault(); if (isFocusMode) exitFocusMode(); else document.body.classList.toggle('panels-hidden'); }
+  // P — focus mode
+  if (e.key === 'p' || e.key === 'P') { e.preventDefault(); toggleFocusMode(); }
+  // Esc — exit any mode
+  if (e.key === 'Escape') {
+    if (isFocusMode) exitFocusMode();
+    else { document.body.classList.remove('panels-hidden'); document.getElementById('sidebar').classList.remove('open'); document.body.classList.remove('sidebar-open'); }
+  }
+});
+
+// Touch swipe
+let tx = 0;
+document.getElementById('zoom-wrapper').addEventListener('touchstart', e => tx = e.touches[0].clientX, {passive:true});
+document.getElementById('zoom-wrapper').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) dx < 0 ? nextSlide() : prevSlide();
+}, {passive:true});
+
+goTo(0);
+applyZoom();
+track.style.transition = 'none';
+requestAnimationFrame(() => { track.style.transition = ''; });
+</script>
+</body>
+</html>
