@@ -420,12 +420,6 @@ body.focus-mode .focus-hint{opacity:1;}
     <span class="tab-icon">📄</span> README
     <span class="tab-count" id="tab-count">1/13</span>
   </a>
-  <a class="tab" href="designer.html">
-    <span class="tab-icon">🎨</span> Designer version
-  </a>
-  <a class="tab" href="index.html">
-    <span class="tab-icon">🏠</span> Index
-  </a>
 </div>
 
 <!-- PROGRESS -->
@@ -440,6 +434,81 @@ body.focus-mode .focus-hint{opacity:1;}
 <!-- MAIN CONTENT -->
 <div class="main">
   <div class="zoom-wrapper" id="zoom-wrapper"><div class="slides-track" id="slides-track">
+
+    <!-- Ways of Working -->
+    <div class="slide">
+      <div class="readme">
+        <h1>team/ways-of-working.md</h1>
+        <p>The tooling changed. The team structure question didn't get easier — it got more explicit. Here are the three models teams are actually running.</p>
+
+        <div class="alert alert-note">
+          <span class="alert-icon">ℹ️</span>
+          <span>There's no universally correct model. The right one depends on your team's trust level, code ownership culture, and where the bottleneck actually lives.</span>
+        </div>
+
+        <h2>Model A — Designer vibes, dev integrates</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">ownership split</span></div>
+          <div class="code-body">Designer  →  Claude Code  →  UI components in repo
+Developer →  API, state, auth, business logic, integration
+
+<span class="c"># Designer ships components directly to the codebase.</span>
+<span class="c"># Dev wires them to data and handles everything non-visual.</span></div>
+        </div>
+        <table class="gh-table">
+          <thead><tr><th>Works when</th><th>Breaks when</th></tr></thead>
+          <tbody>
+            <tr><td>Designer is comfortable reading and committing Claude Code output</td><td>Components don't follow codebase conventions — no one catches drift</td></tr>
+            <tr><td>Clear contract: where UI ends, business logic begins</td><td>"Claude wrote it" is used to dodge review comments</td></tr>
+            <tr><td>Design system is tokenised — tokens in code, not just Figma</td><td>Designer ships components with hardcoded values, dev has to fix</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Model B — Designer designs, dev vibes</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">ownership split</span></div>
+          <div class="code-body">Designer  →  Figma (structured: named layers, tokens, variants)
+Developer →  Claude Code reads Figma via MCP  →  full implementation
+
+<span class="c"># Dev implements from spec. Designer reviews output.</span>
+<span class="c"># Traditional roles, Claude accelerates the dev side.</span></div>
+        </div>
+        <table class="gh-table">
+          <thead><tr><th>Works when</th><th>Breaks when</th></tr></thead>
+          <tbody>
+            <tr><td>Figma file is well-structured — named layers, Auto Layout, Variables</td><td>Figma files are messy — Claude approximates, drift goes unnoticed</td></tr>
+            <tr><td>Designer and dev have a shared, fast review ritual</td><td>Review is async and slow — drift compounds across components</td></tr>
+            <tr><td>Dev bottleneck is the team's constraint</td><td>Design system changes outpace dev's ability to review output quality</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Model C — Fluid, with explicit ownership</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">ownership split</span></div>
+          <div class="code-body">Both designer and developer use Claude.
+The question is not who writes — it is who owns the PR.
+
+<span class="c"># Whoever merges it is responsible for spec fidelity.</span>
+<span class="c"># Works at high trust. Collapses without code ownership culture.</span></div>
+        </div>
+
+        <h2>The questions that actually matter</h2>
+        <table class="gh-table">
+          <thead><tr><th>Question</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Who reviews Claude's output?</strong></td><td>Someone with both design and code context must own the final check. Claude is not the last line of defence.</td></tr>
+            <tr><td><strong>Where does the design system live?</strong></td><td>If it's only in Figma, Model A is risky. If tokens exist in code too, Model A becomes viable.</td></tr>
+            <tr><td><strong>What's the actual bottleneck?</strong></td><td>If dev is the bottleneck → Models A or B. If design review is the bottleneck → faster review cycles first.</td></tr>
+            <tr><td><strong>Are you drifting into a model?</strong></td><td>Have the conversation explicitly. Decide. Revisit in 6 weeks.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-warn">
+          <span class="alert-icon">⚠️</span>
+          <span><strong>The failure mode all three models share:</strong> no one owns the design-code parity check. Build that ritual first — before deciding who uses which tool.</span>
+        </div>
+      </div>
+    </div>
 
     <!-- SLIDE 1: README / Hero -->
     <div class="slide">
@@ -742,28 +811,114 @@ regenerate the whole component.</div>
       </div>
     </div>
 
-    <!-- SLIDE 6: Prompts -->
+    <!-- SLIDE 6a: Prompting — Anatomy -->
     <div class="slide">
       <div class="readme">
-        <h1>workflow/prompts.md</h1>
-        <p>Copy-paste prompt templates. Adapt the paths and stack specifics to your project.</p>
+        <h1>prompting/anatomy.md</h1>
+        <p>Every strong Figma-to-code prompt has five ingredients. Miss one and Claude has to guess. Guessing produces generic output.</p>
 
-        <h2>Component from Figma</h2>
+        <h2>The 5 ingredients</h2>
+        <table class="gh-table">
+          <thead><tr><th>#</th><th>Ingredient</th><th>Why it matters</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-purple">①</span></td><td><strong>Figma node URL</strong></td><td>Points Claude to the exact component, not the whole file</td><td><code>?node-id=4-23</code></td></tr>
+            <tr><td><span class="pill pill-blue">②</span></td><td><strong>Stack</strong></td><td>Without this Claude picks defaults that may not match your codebase</td><td><code>Next.js 15, Tailwind, TypeScript</code></td></tr>
+            <tr><td><span class="pill pill-yellow">③</span></td><td><strong>Token file path</strong></td><td>Single biggest quality multiplier — no hardcoded hex values</td><td><code>/tokens/index.ts</code></td></tr>
+            <tr><td><span class="pill pill-green">④</span></td><td><strong>Pattern reference</strong></td><td>Claude matches your file structure, naming, and code style</td><td><code>/components/Card.tsx</code></td></tr>
+            <tr><td><span class="pill pill-red">⑤</span></td><td><strong>Intent / requirements</strong></td><td>What you need out — variants, ARIA, stories, output format</td><td><code>All variants · ARIA · Storybook</code></td></tr>
+          </tbody>
+        </table>
+
+        <h2>Without vs with</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">✗ missing ingredients</span></div>
+          <div class="code-body"><span class="c"># Claude has to guess everything</span>
+"Build this component for me."
+
+<span class="c"># Result: generic, unstyled, wrong framework,</span>
+<span class="c"># hardcoded values, no variants, no stories.</span></div>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">✓ all 5 present</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">Implement ProductCard from https://figma.com/design/abc?node-id=4-23
+
+Stack: Next.js 15, Tailwind CSS, TypeScript
+Tokens: /tokens/index.ts — no hardcoded values
+Pattern: follow /components/Card.tsx for structure
+Match all Figma variants · ARIA-compliant · Storybook story per variant</div>
+        </div>
+
+        <div class="alert alert-tip">
+          <span class="alert-icon">💡</span>
+          <span><strong>Always use node-specific URLs.</strong> Right-click any frame or component in Figma → Copy link. The URL contains <code>?node-id=X-Y</code>. A whole-page URL floods Claude with noise from every other frame on the page.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6b: Prompting — Weak vs Strong -->
+    <div class="slide">
+      <div class="readme">
+        <h1>prompting/examples.md</h1>
+        <p>Real before/after pairs. The weak version is what most people write first. The strong version is what ships.</p>
+
+        <h2>Side by side</h2>
+        <table class="gh-table">
+          <thead><tr><th>Weak ✗</th><th>Strong ✓</th></tr></thead>
+          <tbody>
+            <tr><td><code>"Make it look like the design."</code></td><td><code>"Implement ProductCard from [link]. Match the hover variant — lifts 4px with a soft diffuse shadow."</code></td></tr>
+            <tr><td><code>"The spacing is off, fix it."</code></td><td><code>"Gap between icon and label is hardcoded at 4px — change to the spacing/xs token."</code></td></tr>
+            <tr><td><code>"Add a hover state."</code></td><td><code>"Entrance should feel like the element is settling, not snapping. Match the easing from the Figma prototype."</code></td></tr>
+            <tr><td><code>"Make it accessible."</code></td><td><code>"Focus ring must use the color/focus token. All interactive elements need ARIA labels. Keyboard navigable."</code></td></tr>
+            <tr><td><code>"It changed, update it."</code></td><td><code>"Diff /components/Card.tsx against [updated link]. Apply only visual changes — preserve all props, handlers, logic."</code></td></tr>
+          </tbody>
+        </table>
+
+        <h2>What makes a prompt fail</h2>
+        <table class="gh-table">
+          <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>Whole-page Figma URL</td><td>Use node-specific URL (<code>?node-id=X-Y</code>)</td></tr>
+            <tr><td>No stack context</td><td>Specify framework + CSS approach</td></tr>
+            <tr><td>No token reference</td><td>Point to your actual token file</td></tr>
+            <tr><td>12 components at once</td><td>One component per conversation</td></tr>
+            <tr><td>No pattern reference</td><td>Link to an existing similar component</td></tr>
+            <tr><td>Vague intent</td><td>Describe design intent, not implementation</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 6c: Prompting — Templates -->
+    <div class="slide">
+      <div class="readme">
+        <h1>prompting/templates.md</h1>
+        <p>Copy-paste ready. Adapt the bracketed parts to your project.</p>
+
+        <h2>New component</h2>
         <div class="code-block">
           <div class="code-header"><span class="code-lang">prompt template</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <div class="code-body">Implement [COMPONENT_NAME] from [FIGMA_URL] as a React component.
+          <div class="code-body">Implement [COMPONENT_NAME] from [FIGMA_URL]
 
-Stack: [YOUR_STACK]
-Tokens: [TOKEN_FILE_PATH]
-Pattern reference: [EXISTING_COMPONENT_PATH]
-Props: [LIST_PROPS]
+Stack: [Next.js / React / Vue], [Tailwind / CSS Modules], TypeScript
+Tokens: [/tokens/index.ts] — no hardcoded values
+Pattern: follow [/components/Card.tsx] for structure
 
 Requirements:
 - Match all Figma variant states (hover, focus, disabled)
 - Keyboard navigable, ARIA-labelled
 - No inline styles, no hardcoded values
-- Export a Storybook story for each variant
+- Storybook story for each variant
 - TypeScript strict mode</div>
+        </div>
+
+        <h2>Design updated — patch only</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">prompt template</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <div class="code-body">The design for [COMPONENT] changed. Updated link: [FIGMA_URL]
+
+Read the current [FILE_PATH] and apply only the visual
+changes. Preserve all logic, state management, event
+handlers, and prop interfaces. Output a minimal diff.</div>
         </div>
 
         <h2>Token extraction</h2>
@@ -777,34 +932,110 @@ Output three files:
 3. tokens/tailwind.ts — Tailwind theme extension
 
 Group by: color, spacing, typography, radius, shadow.
-Use kebab-case for CSS vars, camelCase for JS keys.</div>
+kebab-case for CSS vars, camelCase for JS keys.</div>
         </div>
 
-        <h2>Iterative update</h2>
+        <h2>Design critique</h2>
         <div class="code-block">
           <div class="code-header"><span class="code-lang">prompt template</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-          <div class="code-body">The design for [COMPONENT] changed. Updated link: [FIGMA_URL]
+          <div class="code-body">Review this component against the Figma spec.
+Figma: [FIGMA_URL]
+Screenshot of built component: [attached]
 
-Read the current [FILE_PATH] and apply only the visual
-changes. Preserve all logic, state management, event
-handlers, and prop interfaces. Output a minimal diff.</div>
+Find: spacing drift, colours not matching tokens,
+border-radius inconsistencies, missing interaction states.
+Flag each as: 🔴 blocks ship · 🟡 before release · 🟢 OK</div>
         </div>
-
-        <h2>What makes a prompt fail</h2>
-        <table class="gh-table">
-          <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
-          <tbody>
-            <tr><td>Whole-page Figma URL</td><td>Use node-specific URL (<code>?node-id=X-Y</code>)</td></tr>
-            <tr><td>No stack context</td><td>Specify framework + CSS approach</td></tr>
-            <tr><td>No token reference</td><td>Point to your actual token file</td></tr>
-            <tr><td>12 components at once</td><td>One component per conversation</td></tr>
-            <tr><td>No pattern reference</td><td>Link to an existing similar component</td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
-    <!-- SLIDE 7: Limits -->
+        <!-- Figma Web Gap -->
+    <div class="slide">
+      <div class="readme">
+        <h1>workflow/figma-web-gap.md</h1>
+        <p>These are Figma rendering features with no direct CSS equivalent. Not Claude's limitations — gaps in the web platform itself. Know them before promising pixel-perfect output.</p>
+
+        <div class="alert alert-danger">
+          <span class="alert-icon">⚠️</span>
+          <span><strong>Catch these at design time, not sprint review.</strong> If the designer used any of the features below, agree on a web-compatible approximation before implementation starts.</span>
+        </div>
+
+        <h2>The gap table</h2>
+        <table class="gh-table">
+          <thead><tr><th>Figma feature</th><th>Web equivalent</th><th>Fidelity</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Angular / diamond gradients</strong></td>
+              <td><code>conic-gradient()</code> approximation only</td>
+              <td><span class="pill pill-red">Poor</span></td>
+            </tr>
+            <tr>
+              <td><strong>Image fills on custom shapes</strong></td>
+              <td><code>clip-path</code> + <code>background-image</code> for simple shapes; SVG mask for complex</td>
+              <td><span class="pill pill-yellow">Partial</span></td>
+            </tr>
+            <tr>
+              <td><strong>Layer blend modes</strong></td>
+              <td><code>mix-blend-mode</code> — compositing context differs from Figma</td>
+              <td><span class="pill pill-yellow">Partial</span></td>
+            </tr>
+            <tr>
+              <td><strong>Inner shadow</strong></td>
+              <td><code>box-shadow inset</code> — close but not identical</td>
+              <td><span class="pill pill-yellow">Partial</span></td>
+            </tr>
+            <tr>
+              <td><strong>Stroke alignment (inside/outside)</strong></td>
+              <td>CSS stroke is always center — fake with <code>outline</code> or scale tricks</td>
+              <td><span class="pill pill-yellow">Partial</span></td>
+            </tr>
+            <tr>
+              <td><strong>Background blur (frosted glass)</strong></td>
+              <td><code>backdrop-filter: blur()</code> — partial browser support, breaks with <code>overflow:hidden</code></td>
+              <td><span class="pill pill-yellow">Partial</span></td>
+            </tr>
+            <tr>
+              <td><strong>Vector effects (noise, warp, distort)</strong></td>
+              <td>No CSS equivalent — needs Lottie, GSAP, or hand-coded SVG</td>
+              <td><span class="pill pill-red">None</span></td>
+            </tr>
+            <tr>
+              <td><strong>Text on a path</strong></td>
+              <td>SVG <code>textPath</code> for static text only</td>
+              <td><span class="pill pill-red">Poor</span></td>
+            </tr>
+            <tr>
+              <td><strong>Linked assets / embedded images</strong></td>
+              <td>Claude can reference by name — you must export separately and provide paths</td>
+              <td><span class="pill pill-red">Manual</span></td>
+            </tr>
+            <tr>
+              <td><strong>Figma prototype interactions</strong></td>
+              <td>Timing and easing must be manually translated to CSS transitions / JS</td>
+              <td><span class="pill pill-yellow">Manual</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>What Claude will do</h2>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">behaviour</span></div>
+          <div class="code-body"><span class="g">✓ Approximate</span>  — use the closest CSS equivalent and note the gap
+<span class="g">✓ Comment</span>      — flag in generated code where approximation was made
+<span class="g">✓ Suggest</span>      — recommend a library (Lottie, GSAP) when CSS won't work
+
+<span class="v">✗ Silently ignore</span> — Claude won't skip effects without telling you
+<span class="v">✗ Auto-export</span>    — assets must be exported manually from Figma</div>
+        </div>
+
+        <div class="alert alert-tip">
+          <span class="alert-icon">💡</span>
+          <span><strong>Prompt tip:</strong> Add <code>"Flag any Figma effects that don't translate cleanly to CSS and suggest an alternative"</code> to your component prompts. Claude will surface the gap explicitly rather than silently approximating.</span>
+        </div>
+      </div>
+    </div>
+
+<!-- SLIDE 7: Limits -->
     <div class="slide">
       <div class="readme">
         <h1>workflow/limits.md</h1>
@@ -1278,19 +1509,23 @@ Two modes: remote (browser) + desktop (local/offline).</div>
 
 
 const slideData = [
-  { file:'README.md',               section:''        },
-  { file:'setup/install.sh',        section:'setup'   },
-  { file:'setup/mcp-config.md',     section:'setup'   },
-  { file:'setup/figma-prep.md',     section:'setup'   },
-  { file:'workflow/loop.md',        section:'workflow' },
-  { file:'workflow/prompts.md',     section:'workflow' },
-  { file:'workflow/limits.md',      section:'workflow' },
-  { file:'workflow/code-to-figma.md', section:'workflow' },
-  { file:'skills/intro.md',         section:'skills'  },
-  { file:'skills/build.md',         section:'skills'  },
-  { file:'skills/registry.md',      section:'skills'  },
-  { file:'tools/console-mcp.md',    section:'tools'   },
-  { file:'CHANGELOG.md',            section:''        },
+  { file:'README.md',                  section:''          },
+  { file:'setup/install.sh',           section:'setup'     },
+  { file:'setup/mcp-config.md',        section:'setup'     },
+  { file:'setup/figma-prep.md',        section:'setup'     },
+  { file:'workflow/loop.md',           section:'workflow'  },
+  { file:'workflow/figma-web-gap.md',  section:'workflow'  },
+  { file:'workflow/limits.md',         section:'workflow'  },
+  { file:'workflow/code-to-figma.md',  section:'workflow'  },
+  { file:'prompting/anatomy.md',       section:'prompting' },
+  { file:'prompting/examples.md',      section:'prompting' },
+  { file:'prompting/templates.md',     section:'prompting' },
+  { file:'skills/intro.md',            section:'skills'    },
+  { file:'skills/build.md',            section:'skills'    },
+  { file:'skills/registry.md',         section:'skills'    },
+  { file:'tools/console-mcp.md',       section:'tools'     },
+  { file:'team/ways-of-working.md',    section:'team'      },
+  { file:'CHANGELOG.md',              section:''          },
 ];
 
 const total = slideData.length;
@@ -1415,6 +1650,14 @@ document.getElementById('zoom-wrapper').addEventListener('touchend', e => {
 }, {passive:true});
 
 goTo(0);
+
+  // Deep link from quickref — jump to target slide on load
+  const _targetSlide = sessionStorage.getItem('targetSlide');
+  if (_targetSlide !== null) {
+    sessionStorage.removeItem('targetSlide');
+    const _n = parseInt(_targetSlide, 10);
+    if (!isNaN(_n)) goTo(_n);
+  }
 applyZoom();
 track.style.transition = 'none';
 requestAnimationFrame(() => { track.style.transition = ''; });

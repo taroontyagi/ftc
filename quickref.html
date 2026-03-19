@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figma → Code with Claude · Quick Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Syne:wght@700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html, body { min-height:100%; background:#111; color:#ccc; font-family:'Fragment Mono',monospace; }
+
+  .wrap { width:min(600px,90vw); margin:0 auto; padding:64px 0 80px; display:flex; flex-direction:column; gap:44px; }
+
+  /* header */
+  .back { font-size:10px; color:#333; text-decoration:none; letter-spacing:.04em; transition:color .15s; display:inline-block; margin-bottom:20px; }
+  .back:hover { color:#888; }
+  .title { font-family:'Syne',sans-serif; font-size:clamp(26px,5vw,38px); font-weight:800; color:#fff; line-height:1.05; letter-spacing:-.02em; }
+  .subtitle { font-family:'Instrument Serif',serif; font-style:italic; font-size:14px; color:#555; line-height:1.6; margin-top:10px; }
+  .by { font-size:10px; color:#333; margin-top:14px; letter-spacing:.04em; }
+
+  /* rule */
+  .rule { height:1px; background:#1e1e1e; }
+
+  /* section */
+  .section-label { font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#333; margin-bottom:16px; }
+
+  /* rows — the main layout unit */
+  .rows { display:flex; flex-direction:column; }
+  .row {
+    display:grid;
+    grid-template-columns:180px 1fr auto;
+    gap:16px;
+    padding:11px 0;
+    border-bottom:1px solid #1a1a1a;
+    align-items:baseline;
+  }
+  .row:last-child { border-bottom:none; }
+  .row-key { font-size:11px; font-weight:600; color:#e0e0e0; }
+  .row-val { font-size:11px; color:#444; line-height:1.6; }
+  .row-val strong { color:#666; font-weight:400; }
+  .row-val code { background:#191919; border:1px solid #222; border-radius:3px; padding:1px 5px; font-size:10px; color:#888; }
+  .row-link { font-size:10px; color:#2a2a2a; text-decoration:none; white-space:nowrap; transition:color .15s; }
+  .row-link:hover { color:#888; }
+
+  /* flow */
+  .flow { display:flex; align-items:center; flex-wrap:wrap; row-gap:8px; }
+  .flow-node { font-size:11px; color:#e0e0e0; padding:5px 11px; border:1px solid #222; border-radius:4px; background:#161616; white-space:nowrap; }
+  .flow-arrow { font-size:11px; color:#2a2a2a; padding:0 6px; flex-shrink:0; }
+  .flow-note { font-size:10px; color:#333; margin-top:10px; line-height:1.6; }
+
+  /* cmd blocks */
+  .cmd { background:#161616; border:1px solid #1e1e1e; border-radius:4px; padding:9px 13px; font-size:11px; color:#5a9e74; line-height:1.7; cursor:pointer; transition:border-color .15s; width:100%; margin-top:6px; }
+  .cmd:hover { border-color:#2a2a2a; }
+
+  /* gap table */
+  .gap-table { width:100%; border-collapse:collapse; font-size:11px; }
+  .gap-table th { font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#333; padding:5px 0; border-bottom:1px solid #1e1e1e; text-align:left; font-weight:400; }
+  .gap-table td { padding:8px 0; border-bottom:1px solid #181818; color:#3e3e3e; vertical-align:top; line-height:1.55; }
+  .gap-table td:first-child { color:#666; padding-right:16px; white-space:nowrap; }
+  .gap-table td code { font-size:10px; color:#555; }
+  .gap-table tr:last-child td { border-bottom:none; }
+  .fidelity { font-size:9px; padding:1px 6px; border-radius:3px; border:1px solid; white-space:nowrap; font-weight:600; }
+  .f-poor    { color:#f85149; border-color:rgba(248,81,73,.3); background:rgba(248,81,73,.08); }
+  .f-partial { color:#d29922; border-color:rgba(210,153,34,.3); background:rgba(210,153,34,.08); }
+  .f-manual  { color:#7d8590; border-color:#30363d; background:#1a1a1a; }
+
+  /* prompt example */
+  .prompt-block { background:#161616; border:1px solid #1e1e1e; border-radius:4px; padding:12px 14px; font-size:11px; color:#555; line-height:1.8; margin-top:8px; }
+  .prompt-block .hl { color:#9e7fff; }
+  .prompt-block .dim { color:#2e2e2e; }
+
+  /* model cards */
+  .models { display:flex; flex-direction:column; gap:10px; }
+  .model { padding:13px 14px; border:1px solid #1e1e1e; border-radius:5px; }
+  .model-title { font-size:11px; font-weight:600; color:#e0e0e0; margin-bottom:5px; }
+  .model-desc { font-size:11px; color:#3e3e3e; line-height:1.6; }
+  .model-desc strong { color:#555; font-weight:400; }
+
+  /* deep links */
+  .deep { font-size:10px; color:#2a2a2a; text-decoration:none; transition:color .15s; }
+  .deep:hover { color:#888; }
+  .deep::before { content:'↗ '; }
+
+  /* footer */
+  .footer { font-size:10px; color:#2a2a2a; line-height:1.8; }
+  .footer a { color:#333; text-decoration:none; transition:color .15s; }
+  .footer a:hover { color:#888; }
+  .sig { font-family:'Instrument Serif',serif; font-style:italic; color:#3a3a3a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div>
+    <a class="back" href="./index.html">← back</a>
+    <div class="title">Quick Reference</div>
+    <div class="subtitle">Everything in one place — with links into<br>the full designer and developer decks.</div>
+    <div class="by">by Taroon Tyagi · March 2026</div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- THE FLOW -->
+  <div>
+    <div class="section-label">How it connects</div>
+    <div class="flow">
+      <div class="flow-node">Figma</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">MCP</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Claude Code</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Component in repo</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Capture back to Figma</div>
+    </div>
+    <div class="flow-note">MCP is the bridge — Claude reads your Figma file in real time. No export, no copy-paste. The loop is bidirectional since Feb 2026.</div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- SETUP -->
+  <div>
+    <div class="section-label">Setup · one time</div>
+    <div class="rows">
+      <div class="row">
+        <div class="row-key">Install Claude Code</div>
+        <div class="row-val">Native binary, no Node.js. Requires Claude Pro or Max.</div>
+        <a class="row-link deep" href="./developer.html#" onclick="openSlide('developer.html',1);return false;">dev slide 2</a>
+      </div>
+      <div class="row">
+        <div class="row-key">Connect Figma MCP</div>
+        <div class="row-val">Run once, works across all projects. Then <code>/mcp</code> → authenticate.</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',2);return false;">dev slide 3</a>
+      </div>
+      <div class="row">
+        <div class="row-key">Prepare Figma file</div>
+        <div class="row-val">Named layers, Auto Layout everywhere, Variables bound to every fill and gap.</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',4);return false;">designer slide 5</a>
+      </div>
+    </div>
+    <div class="cmd" onclick="copyCmd(this,'curl -fsSL https://claude.ai/install.sh | bash')">curl -fsSL https://claude.ai/install.sh | bash</div>
+    <div class="cmd" onclick="copyCmd(this,'claude mcp add --scope user --transport http figma https://mcp.figma.com/mcp')" style="margin-top:6px">claude mcp add --scope user --transport http figma https://mcp.figma.com/mcp</div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- THE LOOP -->
+  <div>
+    <div class="section-label">The workflow loop</div>
+    <div class="rows">
+      <div class="row">
+        <div class="row-key">01 · Design with intent</div>
+        <div class="row-val">Semantic layer names. Auto Layout on every container. Variables on every fill.</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',4);return false;">designer slide 5</a>
+      </div>
+      <div class="row">
+        <div class="row-key">02 · Copy node URL</div>
+        <div class="row-val">Right-click frame → Copy link. Use <code>?node-id=X-Y</code>, never the whole-page URL.</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',4);return false;">dev slide 5</a>
+      </div>
+      <div class="row">
+        <div class="row-key">03 · Prompt Claude</div>
+        <div class="row-val">Link + stack + token path + pattern reference + intent. All five. Every time.</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',10);return false;">designer slide 11</a>
+      </div>
+      <div class="row">
+        <div class="row-key">04 · Review output</div>
+        <div class="row-val">Open in browser. Describe what's off in design language — Claude translates.</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',6);return false;">designer slide 7</a>
+      </div>
+      <div class="row">
+        <div class="row-key">05 · Design changed?</div>
+        <div class="row-val">Share new link. Ask Claude to diff and patch — not regenerate. Preserves all logic.</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',4);return false;">dev slide 5</a>
+      </div>
+      <div class="row">
+        <div class="row-key">06 · Capture back</div>
+        <div class="row-val">Ask Claude to send built UI back to Figma as editable frames. Feb 2026 feature.</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',8);return false;">designer slide 9</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- PROMPTING -->
+  <div>
+    <div class="section-label">Prompting — the 5 ingredients</div>
+    <div class="rows">
+      <div class="row">
+        <div class="row-key">① Figma node URL</div>
+        <div class="row-val">Points Claude to the exact component. <code>?node-id=X-Y</code></div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',10);return false;">designer slide 11</a>
+      </div>
+      <div class="row">
+        <div class="row-key">② Stack</div>
+        <div class="row-val">Framework + CSS approach. Without this Claude guesses.</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',8);return false;">dev slide 9</a>
+      </div>
+      <div class="row">
+        <div class="row-key">③ Token file path</div>
+        <div class="row-val">Biggest quality multiplier. <code>/tokens/index.ts</code></div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',8);return false;">dev slide 9</a>
+      </div>
+      <div class="row">
+        <div class="row-key">④ Pattern reference</div>
+        <div class="row-val">An existing component to follow. <code>/components/Card.tsx</code></div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',8);return false;">dev slide 9</a>
+      </div>
+      <div class="row">
+        <div class="row-key">⑤ Intent</div>
+        <div class="row-val">All variants · ARIA · Storybook story · TypeScript strict</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',10);return false;">dev slide 11</a>
+      </div>
+    </div>
+    <div class="prompt-block">
+      Implement <span class="hl">[ComponentName]</span> from <span class="hl">[FIGMA_URL]</span><br>
+      Stack: <span class="hl">[Next.js]</span>, <span class="hl">[Tailwind]</span>, TypeScript<br>
+      Tokens: <span class="hl">[/tokens/index.ts]</span> — no hardcoded values<br>
+      Pattern: <span class="hl">[/components/Card.tsx]</span><br>
+      <span class="dim">All variants · ARIA · Storybook story</span>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:#2a2a2a">
+      <a class="deep" href="./developer.html" onclick="openSlide('developer.html',9);return false;">Weak vs strong examples</a>
+      &nbsp;·&nbsp;
+      <a class="deep" href="./developer.html" onclick="openSlide('developer.html',10);return false;">4 copy-paste templates</a>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- FIGMA → WEB GAP -->
+  <div>
+    <div class="section-label">Figma → Web Gap</div>
+    <table class="gap-table">
+      <thead><tr><th>Figma feature</th><th>Web reality</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>Angular / diamond gradients</td><td><code>conic-gradient()</code> approximation only</td><td><span class="fidelity f-poor">Poor</span></td></tr>
+        <tr><td>Image fills on shapes</td><td><code>clip-path</code> + <code>background-image</code> — breaks on complex paths</td><td><span class="fidelity f-partial">Partial</span></td></tr>
+        <tr><td>Layer blend modes</td><td><code>mix-blend-mode</code> — compositing differs</td><td><span class="fidelity f-partial">Partial</span></td></tr>
+        <tr><td>Inner shadow</td><td><code>box-shadow inset</code> — close but not identical</td><td><span class="fidelity f-partial">Partial</span></td></tr>
+        <tr><td>Stroke inside/outside</td><td>CSS stroke always center — fake with outline or scale</td><td><span class="fidelity f-partial">Partial</span></td></tr>
+        <tr><td>Background blur</td><td><code>backdrop-filter: blur()</code> — partial support, breaks with overflow:hidden</td><td><span class="fidelity f-partial">Partial</span></td></tr>
+        <tr><td>Vector effects (noise, warp)</td><td>No CSS equivalent — needs Lottie or GSAP</td><td><span class="fidelity f-poor">None</span></td></tr>
+        <tr><td>Text on a path</td><td>SVG textPath for static text only</td><td><span class="fidelity f-poor">Poor</span></td></tr>
+        <tr><td>Linked assets / images</td><td>Must be exported manually — Claude references by name only</td><td><span class="fidelity f-manual">Manual</span></td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:10px;color:#2a2a2a">
+      <a class="deep" href="./designer.html" onclick="openSlide('designer.html',15);return false;">Designer deck</a>
+      &nbsp;·&nbsp;
+      <a class="deep" href="./developer.html" onclick="openSlide('developer.html',5);return false;">Developer deck</a>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- KNOWN LIMITS -->
+  <div>
+    <div class="section-label">Known limits</div>
+    <div class="rows">
+      <div class="row">
+        <div class="row-key">Unnamed layers</div>
+        <div class="row-val">Frame 1234 gives Claude nothing. Name everything semantically.</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',14);return false;">designer slide 15</a>
+      </div>
+      <div class="row">
+        <div class="row-key">Business logic</div>
+        <div class="row-val">Claude sees your UI, not your data model or API contracts.</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',6);return false;">dev slide 7</a>
+      </div>
+      <div class="row">
+        <div class="row-key">Multi-screen in one shot</div>
+        <div class="row-val">One component or one screen per conversation.</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',6);return false;">dev slide 7</a>
+      </div>
+      <div class="row">
+        <div class="row-key">First pass = final</div>
+        <div class="row-val">Treat output as a strong first draft. Always review before merging.</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',13);return false;">designer slide 14</a>
+      </div>
+      <div class="row">
+        <div class="row-key">Free Figma plan</div>
+        <div class="row-val">~6 MCP calls/month. Real usage needs Figma Professional.</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',2);return false;">dev slide 3</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- SKILLS -->
+  <div>
+    <div class="section-label">Skills to install</div>
+    <div class="rows">
+      <div class="row">
+        <div class="row-key">frontend-design</div>
+        <div class="row-val">Production UI quality — avoids generic AI aesthetics</div>
+        <a class="row-link" href="#" onclick="copyText(this,'npx skills add anthropics/skills@frontend-design');return false;">copy ↗</a>
+      </div>
+      <div class="row">
+        <div class="row-key">ui-ux-pro-max</div>
+        <div class="row-val">UX audits, IA, interaction design</div>
+        <a class="row-link" href="#" onclick="copyText(this,'npx skills add nextlevelbuilder/ui-ux-pro-max-skill@ui-ux-pro-max');return false;">copy ↗</a>
+      </div>
+      <div class="row">
+        <div class="row-key">web-design-guidelines</div>
+        <div class="row-val">Vercel visual principles — spacing, type, interactive states</div>
+        <a class="row-link" href="#" onclick="copyText(this,'npx skills add vercel-labs/agent-skills@web-design-guidelines');return false;">copy ↗</a>
+      </div>
+      <div class="row">
+        <div class="row-key">shadcn-ui</div>
+        <div class="row-val">Correct variants, Tailwind, Radix composition</div>
+        <a class="row-link" href="#" onclick="copyText(this,'npx skills add giuseppe-trisciuoglio/developer-kit@shadcn-ui');return false;">copy ↗</a>
+      </div>
+      <div class="row">
+        <div class="row-key">web-accessibility</div>
+        <div class="row-val">WCAG 2.2 auditing — contrast, keyboard, ARIA</div>
+        <a class="row-link" href="#" onclick="copyText(this,'npx skills add supercent-io/skills-template@web-accessibility');return false;">copy ↗</a>
+      </div>
+      <div class="row">
+        <div class="row-key">skill-creator</div>
+        <div class="row-val">Interview-driven SKILL.md authoring with eval loop</div>
+        <a class="row-link" href="#" onclick="copyText(this,'npx skills add anthropics/skills --skill skill-creator');return false;">copy ↗</a>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:#2a2a2a">
+      <a class="deep" href="./designer.html" onclick="openSlide('designer.html',17);return false;">What &amp; why</a>
+      &nbsp;·&nbsp;
+      <a class="deep" href="./designer.html" onclick="openSlide('designer.html',18);return false;">Build your own</a>
+      &nbsp;·&nbsp;
+      <a class="deep" href="./designer.html" onclick="openSlide('designer.html',19);return false;">Full library</a>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- WAYS OF WORKING -->
+  <div>
+    <div class="section-label">Ways of working</div>
+    <div class="models">
+      <div class="model">
+        <div class="model-title">🎨 Model A — Designer vibes, dev integrates</div>
+        <div class="model-desc">Designer ships UI components via Claude Code. Dev handles API, state, auth. <strong>Works when:</strong> design system is tokenised in code and there's a clear UI/logic boundary. <strong>Breaks when:</strong> components don't follow codebase conventions.</div>
+      </div>
+      <div class="model">
+        <div class="model-title">⌨️ Model B — Designer designs, dev vibes</div>
+        <div class="model-desc">Traditional roles, dev uses Claude Code with Figma MCP to implement from spec. <strong>Works when:</strong> Figma files are well-structured and there's a shared review ritual. <strong>Breaks when:</strong> Figma is messy and drift goes unnoticed.</div>
+      </div>
+      <div class="model">
+        <div class="model-title">🔄 Model C — Fluid, explicit ownership</div>
+        <div class="model-desc">Both use Claude. The question isn't who writes — it's who owns the PR. <strong>Works at high trust. Collapses without code ownership culture.</strong></div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:#333;line-height:1.7">
+      The failure mode all three share: no one owns the design-code parity check. Build that ritual first.
+    </div>
+    <div style="margin-top:8px;font-size:10px;color:#2a2a2a">
+      <a class="deep" href="./designer.html" onclick="openSlide('designer.html',21);return false;">Designer deck</a>
+      &nbsp;·&nbsp;
+      <a class="deep" href="./developer.html" onclick="openSlide('developer.html',15);return false;">Developer deck</a>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- DEEP LINKS INTO DECKS -->
+  <div>
+    <div class="section-label">Jump into the full decks</div>
+    <div class="rows">
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">🎨 Designer — Design Tokens</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',3);return false;">slide 4</a>
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">🎨 Designer — Visual Thinking</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',7);return false;">slide 8</a>
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">🎨 Designer — Code → Canvas</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',8);return false;">slide 9</a>
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">🎨 Designer — Component Systems</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',9);return false;">slide 10</a>
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">🎨 Designer — Pro Tips</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',16);return false;">slide 17</a>
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">🎨 Designer — figma-console-mcp</div>
+        <a class="row-link deep" href="./designer.html" onclick="openSlide('designer.html',20);return false;">slide 21</a>
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">⌨️ Developer — MCP config options</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',2);return false;">slide 3</a>
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">⌨️ Developer — Code → Figma</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',7);return false;">slide 8</a>
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto">
+        <div class="row-val" style="color:#e0e0e0">⌨️ Developer — figma-console-mcp</div>
+        <a class="row-link deep" href="./developer.html" onclick="openSlide('developer.html',14);return false;">slide 15</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <a href="https://code.claude.com/docs/en/setup" target="_blank">Claude Code</a> ·
+    <a href="https://help.figma.com/hc/en-us/articles/32132100833559" target="_blank">Figma MCP</a> ·
+    <a href="https://skills.sh" target="_blank">skills.sh</a> ·
+    <a href="https://github.com/southleft/figma-console-mcp" target="_blank">figma-console-mcp</a> ·
+    <a href="https://github.com/anthropics/skills" target="_blank">anthropics/skills</a>
+    <br><br>
+    <span class="sig">Taroon Tyagi</span> · Principal Designer · March 2026
+  </div>
+
+</div>
+<script>
+function copyCmd(el, text) {
+  navigator.clipboard?.writeText(text);
+  const orig = el.innerHTML;
+  el.innerHTML = '✓ copied';
+  el.style.color = '#5a9e74';
+  setTimeout(() => { el.innerHTML = orig; el.style.color = ''; }, 1500);
+}
+
+function copyText(el, text) {
+  navigator.clipboard?.writeText(text);
+  const orig = el.textContent;
+  el.textContent = '✓ copied';
+  setTimeout(() => { el.textContent = orig; }, 1500);
+}
+
+// Deep link: store target slide in sessionStorage, open the file
+// The designer/developer pages read this on load and call goTo()
+function openSlide(file, slideIndex) {
+  sessionStorage.setItem('targetSlide', slideIndex);
+  window.open('./' + file, '_blank');
+}
+</script>
+</body>
+</html>

@@ -48,7 +48,7 @@
 
   /* LEFT PANEL */
   .left-panel { position: fixed; left: 0; top: 40px; bottom: 32px; width: 220px; background: var(--fig-panel); border-right: 1px solid var(--fig-border); overflow-y: auto; z-index: 50; scrollbar-width: thin; scrollbar-color: var(--fig-border) transparent; }
-  .panel-header { padding: 10px 12px 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fig-muted); border-bottom: 1px solid var(--fig-border); font-family: 'Fragment Mono', monospace; }
+  .panel-header { padding: 10px 12px 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fig-muted); border-bottom: 1px solid var(--fig-border); font-family: 'Fragment Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* LAYER SECTION HEADERS */
   .layer-section { padding: 8px 12px 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fig-muted); opacity: 0.6; user-select: none; }
@@ -293,7 +293,7 @@
   </div>
   <div class="toolbar-mid">
     <button class="nav-btn" onclick="prevSlide()">◀ Prev</button>
-    <span class="slide-counter" id="counter">1 / 19</span>
+    <span class="slide-counter" id="counter">1 / 23</span>
     <button class="nav-btn" onclick="nextSlide()">Next ▶</button>
   </div>
   <div class="toolbar-right">
@@ -310,7 +310,7 @@
 <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
 
 <div class="left-panel">
-  <div class="panel-header">Layers · Taroon Tyagi's Deck</div>
+  <div class="panel-header">Layers · Taroon Tyagi</div>
   <div id="layers-list"></div>
 </div>
 
@@ -318,7 +318,7 @@
   <div class="prop-section">
     <div class="prop-label">File</div>
     <div class="prop-row"><span class="prop-key">Author</span><span class="prop-val purple">Taroon Tyagi</span></div>
-    <div class="prop-row"><span class="prop-key">Slides</span><span class="prop-val">19</span></div>
+    <div class="prop-row"><span class="prop-key">Slides</span><span class="prop-val">23</span></div>
     <div class="prop-row"><span class="prop-key">Year</span><span class="prop-val">2026</span></div>
   </div>
   <div class="prop-section">
@@ -406,22 +406,27 @@
         <div class="card" style="cursor:pointer" onclick="goTo(6)">
           <span class="card-emoji">🔄</span>
           <div class="card-title">Workflow</div>
-          <div class="card-desc">The loop, prompting, visual thinking, Code → Canvas, components. → slides 7–11</div>
+          <div class="card-desc">The loop, visual thinking, Code → Canvas, components. → slides 7–10</div>
         </div>
-        <div class="card" style="cursor:pointer" onclick="goTo(11)">
+        <div class="card" style="cursor:pointer" onclick="goTo(10)">
+          <span class="card-emoji">💬</span>
+          <div class="card-title">Prompting</div>
+          <div class="card-desc">Anatomy, weak vs strong, copy-paste templates. → slides 11–13</div>
+        </div>
+        <div class="card" style="cursor:pointer" onclick="goTo(13)">
           <span class="card-emoji">🎯</span>
           <div class="card-title">Limits &amp; Tips</div>
-          <div class="card-desc">Can Do, Can't Do, Pro Tips. Saves the sprint review argument. → slides 12–14</div>
+          <div class="card-desc">Can Do, Can't Do, Pro Tips. Saves the sprint review argument. → slides 14–16</div>
         </div>
-        <div class="card" style="cursor:pointer" onclick="goTo(14)">
+        <div class="card" style="cursor:pointer" onclick="goTo(16)">
           <span class="card-emoji">🧠</span>
           <div class="card-title">Agent Skills</div>
-          <div class="card-desc">What they are, how to build one, the prebuilt library. → slides 15–17</div>
+          <div class="card-desc">What they are, how to build one, the prebuilt library. → slides 17–19</div>
         </div>
-        <div class="card" style="cursor:pointer" onclick="goTo(17)">
+        <div class="card" style="cursor:pointer" onclick="goTo(19)">
           <span class="card-emoji">🔌</span>
           <div class="card-title">figma-console-mcp <span class="badge-new">★436</span></div>
-          <div class="card-desc">56+ tools. Plugin debugging, variable CRUD, design–code parity. → slide 18</div>
+          <div class="card-desc">56+ tools. Plugin debugging, variable CRUD, design–code parity. → slide 20</div>
         </div>
       </div>
     </div>
@@ -583,7 +588,7 @@
     <!-- SLIDE 7: DESIGN WORKFLOW -->
 
     <div class="slide" data-frame="Frame 07 — Workflow" data-type="Workflow" data-section="Workflow">
-      <div class="slide-tag">The Design Workflow</div>
+      <div class="slide-tag">The Loop</div>
       <h2 class="slide-title">Figma → Claude → Component<br><span style="font-size:0.6em;color:var(--fig-muted)">Stay in the design chair</span></h2>
       <div class="accent-line"></div>
       <div class="slide-scroll">
@@ -619,43 +624,6 @@
         </div>
       </div>
     </div>
-
-    <!-- SLIDE 8: DESIGN PROMPTING -->
-
-    <div class="slide" data-frame="Frame 08 — Prompting" data-type="Workflow" data-section="Workflow">
-      <div class="slide-tag">Prompting</div>
-      <h2 class="slide-title">Talking to Claude<br>Like a Designer</h2>
-      <div class="accent-line"></div>
-      <div class="slide-scroll">
-        <div class="callout info">
-          <span class="icon">🎨</span>
-          <span>You don't need to speak CSS to prompt well. Describe <em>design intent</em>, not technical implementation. Claude translates. Your job is to be precise about what you want — not how to build it.</span>
-        </div>
-        <div class="cards cards-2" style="margin-top:10px">
-          <div class="card" style="border-color:rgba(242,72,34,0.3)">
-            <span class="card-emoji">❌</span>
-            <div class="card-title" style="color:var(--fig-red)">Weak</div>
-            <div class="card-desc">"Make it look like the design."<br><br>"The spacing is off, fix it."<br><br>"Add a hover state."</div>
-          </div>
-          <div class="card" style="border-color:rgba(20,174,92,0.3)">
-            <span class="card-emoji">✅</span>
-            <div class="card-title" style="color:var(--fig-green)">Strong</div>
-            <div class="card-desc">"Match the card shadow from the Figma hover variant — it should lift 4px with a soft diffuse shadow."<br><br>"The gap between icon and label should use the <span class="hl">spacing/xs</span> token, currently it's hardcoded at 4px."</div>
-          </div>
-        </div>
-        <div class="divider"></div>
-        <p style="font-size:11px;font-family:'Fragment Mono',monospace;color:var(--fig-purple-light);margin-bottom:7px">✦ Designer power moves</p>
-        <ul class="fig-list">
-          <li>Reference your design principles: <span class="hl">"Follow the visual rhythm in our card system — consistent 8pt spacing"</span></li>
-          <li>Describe motion intent: <span class="hl">"Entrance should feel like the element is settling, not snapping"</span></li>
-          <li>Use brand language: <span class="hl">"Warmer, more approachable — reference the onboarding screens"</span></li>
-          <li>Ask for a11y alongside: <span class="hl">"Make sure the focus ring is visible and matches our focus token"</span></li>
-          <li>Give Claude a role: <span class="hl">"Act as a senior FE engineer who deeply cares about design fidelity"</span></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- SLIDE 9: VISUAL THINKING -->
 
     <div class="slide" data-frame="Frame 09 — Visual Thinking" data-type="Advanced" data-section="Workflow">
       <div class="slide-tag">Visual Thinking</div>
@@ -764,8 +732,143 @@
       </div>
     </div>
 
-    <!-- SLIDE 12: SKILLS FOR DESIGNERS -->
+    <!-- PROMPTING SLIDE 1: ANATOMY -->
+    <div class="slide" data-frame="Frame 08 — Prompting" data-type="Workflow" data-section="Workflow">
+      <div class="slide-tag">Prompting · Anatomy</div>
+      <h2 class="slide-title">The Anatomy of<br><span style="color:var(--fig-purple)">a Good Prompt</span></h2>
+      <div class="accent-line"></div>
+      <div class="slide-scroll">
+        <p class="slide-sub" style="margin-bottom:14px">Every strong Figma-to-code prompt has five ingredients. Miss one and Claude has to guess. Guessing produces generic output.</p>
+        <div class="cards cards-2">
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">❌</span>
+            <div class="card-title" style="color:var(--fig-red)">Missing ingredients</div>
+            <div class="card-desc" style="font-family:'Fragment Mono',monospace;font-size:10px;line-height:1.9;color:var(--fig-muted)">
+              "Build this component for me."<br>
+              <span style="color:rgba(242,72,34,0.5)">— no link, no stack, no tokens,<br>&nbsp;&nbsp;&nbsp;no pattern, no intent</span><br><br>
+              Claude produces a generic, unstyled component that matches no design system and satisfies no brief.
+            </div>
+          </div>
+          <div class="card" style="border-color:rgba(20,174,92,0.2)">
+            <span class="card-emoji">✅</span>
+            <div class="card-title" style="color:var(--fig-green)">All 5 present</div>
+            <div class="card-desc" style="font-family:'Fragment Mono',monospace;font-size:10px;line-height:1.9;color:var(--fig-muted)">
+              <span style="color:var(--fig-purple-light)">①</span> <span class="hl">figma.com/design/…?node-id=4-23</span><br>
+              <span style="color:var(--fig-blue)">②</span> Next.js 15, Tailwind, TypeScript<br>
+              <span style="color:var(--fig-yellow)">③</span> Tokens: /tokens/index.ts<br>
+              <span style="color:var(--fig-green)">④</span> Pattern: /components/Card.tsx<br>
+              <span style="color:#ff7a5c">⑤</span> All variants · ARIA · Storybook
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="cards cards-2" style="margin-top:0">
+          <div class="card" style="background:transparent;border-color:rgba(151,71,255,0.2)">
+            <div class="card-title" style="font-size:10px;color:var(--fig-purple-light)">① The Figma link</div>
+            <div class="card-desc">Node-specific URL (<span class="hl">?node-id=X-Y</span>). Never paste the whole page URL — the context becomes noise.</div>
+          </div>
+          <div class="card" style="background:transparent;border-color:rgba(13,153,255,0.2)">
+            <div class="card-title" style="font-size:10px;color:var(--fig-blue)">② Your stack</div>
+            <div class="card-desc">Framework, CSS approach, language. Without this Claude picks defaults that may not match your codebase at all.</div>
+          </div>
+          <div class="card" style="background:transparent;border-color:rgba(255,205,41,0.2)">
+            <div class="card-title" style="font-size:10px;color:var(--fig-yellow)">③ Token file path</div>
+            <div class="card-desc">The single biggest quality multiplier. Claude references your actual tokens instead of hardcoding hex values.</div>
+          </div>
+          <div class="card" style="background:transparent;border-color:rgba(20,174,92,0.2)">
+            <div class="card-title" style="font-size:10px;color:var(--fig-green)">④ Pattern reference</div>
+            <div class="card-desc">An existing component to follow. Claude matches your file structure, naming conventions, and code style automatically.</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- PROMPTING SLIDE 2: WEAK vs STRONG -->
+    <!-- PROMPTING SLIDE 2: WEAK vs STRONG -->
+    <div class="slide" data-frame="Frame 08b — Prompting Examples" data-type="Prompting" data-section="Prompting">
+      <div class="slide-tag">Prompting · Weak vs Strong</div>
+      <h2 class="slide-title">Weak vs Strong —<br><span style="color:var(--fig-purple)">Real Examples</span></h2>
+      <div class="accent-line"></div>
+      <div class="slide-scroll">
+        <div class="callout info">
+          <span class="icon">🎨</span>
+          <span>You don't need to speak CSS. Describe <em>design intent</em>, not implementation. Claude translates. Your job is to be precise about <strong style="color:var(--fig-text)">what</strong> you want — not how to build it.</span>
+        </div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:0">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-bottom:1px">
+            <div style="padding:6px 10px;background:rgba(255,255,255,0.02);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fig-muted)">❌ Weak</div>
+            <div style="padding:6px 10px;background:rgba(255,255,255,0.02);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fig-muted)">✅ Strong</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px">
+            <div style="padding:12px 14px;background:rgba(242,72,34,0.04);border:1px solid rgba(242,72,34,0.12);border-radius:4px 0 0 0;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.65;font-family:'Fragment Mono',monospace">"Make it look like the design."</div>
+            <div style="padding:12px 14px;background:rgba(20,174,92,0.04);border:1px solid rgba(20,174,92,0.12);border-radius:0 4px 0 0;font-size:11px;color:var(--fig-muted);line-height:1.65;font-family:'Fragment Mono',monospace">"Implement the ProductCard from <span class="hl">[link]</span>. Match the hover variant — it lifts 4px with a soft diffuse shadow."</div>
+            <div style="padding:12px 14px;background:rgba(242,72,34,0.04);border:1px solid rgba(242,72,34,0.08);border-top:none;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.65;font-family:'Fragment Mono',monospace">"The spacing is off, fix it."</div>
+            <div style="padding:12px 14px;background:rgba(20,174,92,0.04);border:1px solid rgba(20,174,92,0.08);border-top:none;font-size:11px;color:var(--fig-muted);line-height:1.65;font-family:'Fragment Mono',monospace">"The gap between icon and label is hardcoded at 4px — change to <span class="hl">spacing/xs</span> token."</div>
+            <div style="padding:12px 14px;background:rgba(242,72,34,0.04);border:1px solid rgba(242,72,34,0.08);border-top:none;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.65;font-family:'Fragment Mono',monospace">"Add a hover state."</div>
+            <div style="padding:12px 14px;background:rgba(20,174,92,0.04);border:1px solid rgba(20,174,92,0.08);border-top:none;font-size:11px;color:var(--fig-muted);line-height:1.65;font-family:'Fragment Mono',monospace">"Entrance should feel like the element is settling — not snapping. Reference the easing in the Figma prototype."</div>
+            <div style="padding:12px 14px;background:rgba(242,72,34,0.04);border:1px solid rgba(242,72,34,0.08);border-top:none;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.65;font-family:'Fragment Mono',monospace">"Make it accessible."</div>
+            <div style="padding:12px 14px;background:rgba(20,174,92,0.04);border:1px solid rgba(20,174,92,0.08);border-top:none;font-size:11px;color:var(--fig-muted);line-height:1.65;font-family:'Fragment Mono',monospace">"Focus ring must be visible and use <span class="hl">color/focus</span> token. All interactive elements need ARIA labels. Keyboard navigable."</div>
+            <div style="padding:12px 14px;background:rgba(242,72,34,0.04);border:1px solid rgba(242,72,34,0.08);border-top:none;border-radius:0 0 0 4px;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.65;font-family:'Fragment Mono',monospace">"It changed, update it."</div>
+            <div style="padding:12px 14px;background:rgba(20,174,92,0.04);border:1px solid rgba(20,174,92,0.08);border-top:none;border-radius:0 0 4px 0;font-size:11px;color:var(--fig-muted);line-height:1.65;font-family:'Fragment Mono',monospace">"Diff <span class="hl">/components/Card.tsx</span> against the updated Figma link. Apply only what changed — preserve all logic and event handlers."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- PROMPTING SLIDE 3: TEMPLATES -->
+    <!-- PROMPTING SLIDE 3: TEMPLATES -->
+    <div class="slide" data-frame="Frame 08c — Prompt Templates" data-type="Prompting" data-section="Prompting">
+      <div class="slide-tag">Prompting · Templates</div>
+      <h2 class="slide-title">Copy-Paste<br><span style="color:var(--fig-purple)">Prompt Templates</span></h2>
+      <div class="accent-line"></div>
+      <div class="slide-scroll">
+        <p class="slide-sub" style="margin-bottom:14px">Four templates for the most common tasks. Adapt the bracketed parts to your project.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="background:var(--fig-bg);border:1px solid var(--fig-border);border-radius:6px;overflow:hidden">
+            <div style="padding:8px 14px;background:rgba(151,71,255,0.08);border-bottom:1px solid var(--fig-border);font-size:10px;font-family:'Fragment Mono',monospace;color:var(--fig-purple-light);display:flex;justify-content:space-between;align-items:center"><span>New component</span><span style="color:var(--fig-muted);font-size:9px">most common</span></div>
+            <div style="padding:12px 14px;font-size:10px;font-family:'Fragment Mono',monospace;color:var(--fig-muted);line-height:1.9">
+              Implement <span class="hl">[ComponentName]</span> from <span class="hl">[FIGMA_URL]</span><br>
+              Stack: <span class="hl">[Next.js / React / Vue]</span>, <span class="hl">[Tailwind / CSS Modules]</span>, TypeScript<br>
+              Tokens: <span class="hl">[/tokens/index.ts]</span> — no hardcoded values<br>
+              Pattern: follow <span class="hl">[/components/Card.tsx]</span> for structure<br>
+              Match all Figma variants · ARIA-compliant · Storybook story
+            </div>
+          </div>
+          <div style="background:var(--fig-bg);border:1px solid var(--fig-border);border-radius:6px;overflow:hidden">
+            <div style="padding:8px 14px;background:rgba(13,153,255,0.08);border-bottom:1px solid var(--fig-border);font-size:10px;font-family:'Fragment Mono',monospace;color:var(--fig-blue);display:flex;justify-content:space-between;align-items:center"><span>Design updated — patch only</span><span style="color:var(--fig-muted);font-size:9px">preserve logic</span></div>
+            <div style="padding:12px 14px;font-size:10px;font-family:'Fragment Mono',monospace;color:var(--fig-muted);line-height:1.9">
+              The design for <span class="hl">[ComponentName]</span> was updated.<br>
+              Updated Figma: <span class="hl">[NEW_FIGMA_URL]</span><br><br>
+              Diff <span class="hl">[/components/ComponentName.tsx]</span> against the new design.<br>
+              Apply only the visual changes — preserve all props,<br>
+              event handlers, state, and logic. Output a minimal diff.
+            </div>
+          </div>
+          <div style="background:var(--fig-bg);border:1px solid var(--fig-border);border-radius:6px;overflow:hidden">
+            <div style="padding:8px 14px;background:rgba(255,205,41,0.08);border-bottom:1px solid var(--fig-border);font-size:10px;font-family:'Fragment Mono',monospace;color:var(--fig-yellow);display:flex;justify-content:space-between;align-items:center"><span>Token extraction</span><span style="color:var(--fig-muted);font-size:9px">do this first</span></div>
+            <div style="padding:12px 14px;font-size:10px;font-family:'Fragment Mono',monospace;color:var(--fig-muted);line-height:1.9">
+              Extract all design tokens from <span class="hl">[FIGMA_URL]</span>.<br><br>
+              Output three files:<br>
+              1. tokens/variables.css — CSS custom properties<br>
+              2. tokens/index.ts — typed JS token object<br>
+              3. tokens/tailwind.ts — Tailwind theme extension<br><br>
+              Group by: color, spacing, typography, radius, shadow.<br>
+              kebab-case for CSS vars, camelCase for JS keys.
+            </div>
+          </div>
+          <div style="background:var(--fig-bg);border:1px solid var(--fig-border);border-radius:6px;overflow:hidden">
+            <div style="padding:8px 14px;background:rgba(20,174,92,0.08);border-bottom:1px solid var(--fig-border);font-size:10px;font-family:'Fragment Mono',monospace;color:var(--fig-green);display:flex;justify-content:space-between;align-items:center"><span>Design critique</span><span style="color:var(--fig-muted);font-size:9px">screenshot + link</span></div>
+            <div style="padding:12px 14px;font-size:10px;font-family:'Fragment Mono',monospace;color:var(--fig-muted);line-height:1.9">
+              Review this component against the Figma spec.<br>
+              Figma: <span class="hl">[FIGMA_URL]</span><br>
+              Screenshot of built component: <span class="hl">[attached]</span><br><br>
+              Find: spacing drift, colour not matching tokens,<br>
+              border-radius inconsistencies, missing states.<br>
+              Flag each as: 🔴 blocks ship · 🟡 before release · 🟢 OK
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="slide" data-frame="Frame D-12 — Can Do" data-type="Capabilities" data-section="Limits">
       <div class="slide-tag">Can Do</div>
       <h2 class="slide-title">What Claude <span style="color:var(--fig-green)">CAN</span> Do</h2>
@@ -846,6 +949,88 @@
       </div>
     </div>
 
+    <div class="slide" data-frame="Frame D-13b — Figma Web Gap" data-type="Capabilities" data-section="Limits">
+      <div class="slide-tag">Figma → Web Gap</div>
+      <h2 class="slide-title">What Figma Can Do<br><span style="color:var(--fig-red)">That the Web Can't</span></h2>
+      <div class="accent-line"></div>
+      <div class="slide-scroll">
+        <div class="callout red">
+          <span class="icon">⚠️</span>
+          <span>These aren't Claude's limitations — they're gaps between Figma's rendering model and the web platform. No tool bridges them automatically. Know them before the client demo.</span>
+        </div>
+        <div class="cards cards-2" style="margin-top:12px">
+
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">🌈</span>
+            <div class="card-title">Advanced Gradients</div>
+            <div class="card-desc">
+              Figma supports <span class="hl">angular</span>, <span class="hl">diamond</span>, and complex multi-stop gradients with arbitrary angles. CSS only has <code>linear</code>, <code>radial</code>, and <code>conic</code>. Diamond gradients don't exist in CSS. Claude will approximate — results vary.
+            </div>
+          </div>
+
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">🖼️</span>
+            <div class="card-title">Image Fills on Shapes</div>
+            <div class="card-desc">
+              Figma can fill <em>any vector shape</em> with an image — a star, arrow, custom path. On the web, <code>clip-path</code> + <code>background-image</code> can approximate simple shapes but breaks down fast. Complex paths require SVG masking which Claude will attempt but isn't pixel-perfect.
+            </div>
+          </div>
+
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">✨</span>
+            <div class="card-title">Layer Blend Modes</div>
+            <div class="card-desc">
+              Figma's <span class="hl">Multiply</span>, <span class="hl">Screen</span>, <span class="hl">Overlay</span> etc. exist in CSS (<code>mix-blend-mode</code>) but the compositing context differs. Results are visually different when background colours change — especially on dark surfaces or over images.
+            </div>
+          </div>
+
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">🔲</span>
+            <div class="card-title">Inner Shadows & Stroke Alignment</div>
+            <div class="card-desc">
+              Figma supports <span class="hl">inner shadows</span> and strokes positioned <span class="hl">inside</span>, <span class="hl">outside</span>, or <span class="hl">center</span>. CSS <code>box-shadow</code> only approximates inner shadows. Stroke alignment in CSS is always center — inside/outside must be faked with <code>outline</code> or scale tricks.
+            </div>
+          </div>
+
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">🌫️</span>
+            <div class="card-title">Background Blur</div>
+            <div class="card-desc">
+              Figma's background blur (frosted glass) maps to CSS <code>backdrop-filter: blur()</code> which works — but only has <span class="hl-red">partial browser support</span> and breaks in stacked elements with <code>overflow: hidden</code>. Test on real devices.
+            </div>
+          </div>
+
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">🎭</span>
+            <div class="card-title">Vector Effects & Paths</div>
+            <div class="card-desc">
+              Figma vector effects (noise, distortion, warp) have no CSS equivalent. Complex boolean operations between paths can be output as SVG — but interactive, dynamic, or animated paths need hand-coded SVG or a library like <span class="hl">Lottie</span>, <span class="hl">GSAP</span>, or <span class="hl">Framer Motion</span>.
+            </div>
+          </div>
+
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">🔤</span>
+            <div class="card-title">Text on a Path</div>
+            <div class="card-desc">
+              Figma can place text along any curved path. CSS cannot do this. SVG <code>textPath</code> is the only web equivalent — Claude can generate it for static text, but it won't animate or respond to dynamic content the same way.
+            </div>
+          </div>
+
+          <div class="card" style="border-color:rgba(242,72,34,0.2)">
+            <span class="card-emoji">📦</span>
+            <div class="card-title">Linked Assets & Components</div>
+            <div class="card-desc">
+              Icons, images, and illustrations in Figma are embedded in the file. Claude can reference them by name but <span class="hl-red">cannot export or embed them automatically</span>. You need to export assets separately and provide file paths. SVG icons work best — raster images need an export step.
+            </div>
+          </div>
+
+        </div>
+        <div class="callout" style="margin-top:10px">
+          <span class="icon">💡</span>
+          <span><strong style="color:var(--fig-text)">Rule of thumb:</strong> If it's in Figma's Effects panel, uses a non-standard gradient type, or requires a specific blend mode — verify in browser before committing to the design. Catch the gap at design time, not sprint review.</span>
+        </div>
+      </div>
+    </div>
     <div class="slide" data-frame="Frame D-14 — Pro Tips" data-type="Advanced" data-section="Tips">
       <div class="slide-tag">Pro Tips</div>
       <h2 class="slide-title">Things I Learned<br>The Hard Way</h2>
@@ -1139,6 +1324,61 @@
 
     <!-- Can Do / Can't Do -->
 
+    <div class="slide" data-frame="Frame D-Collab — Ways of Working" data-type="Advanced" data-section="Close">
+      <div class="slide-tag">Ways of Working</div>
+      <h2 class="slide-title">Who Does What<br><span style="color:var(--fig-purple)">Now That Claude Exists?</span></h2>
+      <div class="accent-line"></div>
+      <div class="slide-scroll">
+        <div class="callout info">
+          <span class="icon">🤝</span>
+          <span>There's no single right answer — it depends on your team's trust, size, and who's closest to the decision. But the question is worth having explicitly, not drifting into by accident.</span>
+        </div>
+
+        <div class="cards cards-1" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+
+          <div class="card" style="border-color:rgba(151,71,255,0.25)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <span class="card-emoji">🎨</span>
+              <div class="card-title" style="color:var(--fig-purple-light)">Model A — Designer vibes, dev integrates</div>
+            </div>
+            <div class="card-desc">Designer uses Claude to build UI components directly. Dev handles API wiring, state management, auth, and business logic. Components land in the repo already built.<br><br>
+            <strong style="color:var(--fig-text)">Works when:</strong> Designer is comfortable with Claude Code output and basic component structure. Team has clear handoff contract for where UI ends and logic begins.<br>
+            <strong style="color:var(--fig-red)">Breaks when:</strong> Designer produces components that don't follow the codebase conventions, or when business logic bleeds into UI components.</div>
+          </div>
+
+          <div class="card" style="border-color:rgba(13,153,255,0.25)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <span class="card-emoji">⌨️</span>
+              <div class="card-title" style="color:var(--fig-blue)">Model B — Designer designs, dev vibes</div>
+            </div>
+            <div class="card-desc">Designer stays in Figma. Dev uses Claude Code to implement from the Figma spec — faster than before, with MCP reading the design directly. Designer reviews the output.<br><br>
+            <strong style="color:var(--fig-text)">Works when:</strong> The design system is well-structured (named layers, tokens, variants). Dev and designer have a shared review ritual.<br>
+            <strong style="color:var(--fig-red)">Breaks when:</strong> Figma files are poorly structured, so Claude approximates and the dev doesn't catch the drift from spec.</div>
+          </div>
+
+          <div class="card" style="border-color:rgba(20,174,92,0.25)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <span class="card-emoji">🔄</span>
+              <div class="card-title" style="color:var(--fig-green)">Model C — Fluid, with clear ownership</div>
+            </div>
+            <div class="card-desc">Both use Claude. The question isn't who writes the code — it's who <em>owns the component</em>. Whoever's name is on the PR is responsible for it meeting spec.<br><br>
+            <strong style="color:var(--fig-text)">Works when:</strong> Team culture already has strong code ownership and review habits. High trust, fast feedback loops.<br>
+            <strong style="color:var(--fig-red)">Breaks when:</strong> "Claude wrote it" becomes the answer to every review comment. Ownership dissolves.</div>
+          </div>
+
+        </div>
+
+        <div class="divider"></div>
+        <p style="font-size:11px;font-family:'Fragment Mono',monospace;color:var(--fig-purple-light);margin-bottom:7px">✦ The question that matters most</p>
+        <ul class="fig-list">
+          <li><strong style="color:var(--fig-text)">Who reviews the output?</strong> Claude is not the last line of defence. Someone with both design and code context needs to own the final check.</li>
+          <li><strong style="color:var(--fig-text)">Where does the design system live?</strong> If it's only in Figma, Model A is risky. If it's in code tokens too, Model A becomes viable.</li>
+          <li><strong style="color:var(--fig-text)">What's the team's bottleneck?</strong> If dev is the bottleneck, Model A or B accelerates. If design is the bottleneck, Model B with faster review cycles is the play.</li>
+          <li><strong style="color:var(--fig-text)">Don't drift into a model.</strong> Have the conversation explicitly. Decide. Revisit in 6 weeks.</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="slide" data-frame="Frame 13 — Close" data-type="Outro" data-section="Close">
       <div class="hero-grid" style="opacity:0.1">
         <div class="hero-block"></div><div class="hero-block"></div><div class="hero-block"></div>
@@ -1338,18 +1578,22 @@
     { label: '🎨 Design Tokens',   type: 'Tokens',       section: 'Foundations' },
     { label: '📐 Figma Prep',      type: 'Setup',        section: 'Foundations' },
     { label: '🔗 Code Connect',    type: 'Setup',        section: 'Foundations' },
-    { label: '🔄 Workflow',        type: 'Workflow',     section: 'Workflow'    },
-    { label: '💬 Prompting',       type: 'Workflow',     section: 'Workflow'    },
+    { label: '🔄 The Loop',        type: 'Workflow',     section: 'Workflow'    },
     { label: '🖼️ Visual Thinking', type: 'Advanced',     section: 'Workflow'    },
     { label: '🔁 Code → Canvas',   type: 'Advanced',     section: 'Workflow'    },
     { label: '🧩 Components',      type: 'Advanced',     section: 'Workflow'    },
+    { label: '💬 Anatomy',         type: 'Prompting',    section: 'Prompting'   },
+    { label: '💬 Weak vs Strong',  type: 'Prompting',    section: 'Prompting'   },
+    { label: '💬 Templates',       type: 'Prompting',    section: 'Prompting'   },
     { label: '✅ Can Do',          type: 'Capabilities', section: 'Limits'      },
     { label: "🚫 Can't Do",        type: 'Capabilities', section: 'Limits'      },
+    { label: '🌐 Figma → Web Gap', type: 'Capabilities', section: 'Limits'      },
     { label: '💡 Pro Tips',        type: 'Advanced',     section: 'Limits'      },
     { label: '🧠 What & Why',      type: 'Skills',       section: 'Skills'      },
     { label: '🛠️ Build Your Own',  type: 'Skills',       section: 'Skills'      },
     { label: '📦 Skill Library',   type: 'Skills',       section: 'Skills'      },
     { label: '🔌 Console MCP',     type: 'Advanced',     section: 'Tools'       },
+    { label: '🤝 Ways of Working', type: 'Advanced',     section: 'Close'       },
     { label: '👋 Close',           type: 'Outro',        section: 'Close'       },
   ];
 

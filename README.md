@@ -2,7 +2,18 @@
 
 **by Taroon Tyagi · Principal Designer · March 2026**
 
-A field guide for designers and developers navigating the Figma → Claude → Code workflow. Two editions, same content focus — pick the one that fits how you think.
+A field guide for designers and developers navigating the Figma → Claude → Code workflow. Two full deck editions plus a quick reference — pick what fits.
+
+## 🔗 Live
+
+**[https://taroontyagi.github.io/figma-to-code-deck/](https://taroontyagi.github.io/figma-to-code-deck/)**
+
+| Page | URL |
+|---|---|
+| Landing | `/` |
+| Designer Edition | `/designer.html` |
+| Developer Edition | `/developer.html` |
+| Quick Reference | `/quickref.html` |
 
 ---
 
@@ -11,30 +22,28 @@ A field guide for designers and developers navigating the Figma → Claude → C
 | File | Description |
 |---|---|
 | `index.html` | Landing page — choose your edition |
-| `designer.html` | Figma-style UI · 19 slides · Design-focused |
-| `developer.html` | GitHub-style UI · 13 slides · Terminal-focused |
-
-## Live URL (after GitHub Pages deploy)
-
-```
-https://taroontyagi.github.io/figma-to-code-deck/
-```
+| `designer.html` | Figma-style UI · 23 slides · Design-focused |
+| `developer.html` | GitHub-style UI · 17 slides · Terminal-focused |
+| `quickref.html` | One-page summary with deep links into both decks |
+| `README.md` | This file |
+| `.nojekyll` | Disables Jekyll on GitHub Pages |
 
 ---
 
-## Designer Edition — 19 slides
+## Designer Edition — 23 slides
 
-Figma-core aesthetic (toolbar, layers panel, properties panel, canvas grid). Keyboard navigation, zoom controls, focus mode.
+Figma-core aesthetic: toolbar, layers panel, properties panel, canvas grid. Full keyboard navigation, zoom, and focus mode.
 
 | Section | Slides |
 |---|---|
 | Intro | Hero · Agenda · Toolkit |
 | Foundations | Design Tokens · Figma Prep · Code Connect |
-| Workflow | Workflow · Prompting · Visual Thinking · Code→Canvas · Components |
-| Limits | Can Do · Can't Do · Pro Tips |
+| Workflow | The Loop · Visual Thinking · Code→Canvas · Components |
+| Prompting | Anatomy · Weak vs Strong · Templates |
+| Limits | Can Do · Can't Do · Figma→Web Gap · Pro Tips |
 | Skills | What & Why · Build Your Own · Skill Library |
 | Tools | figma-console-mcp |
-| Close | Close |
+| Close | Ways of Working · Close |
 
 ### Keyboard shortcuts
 
@@ -50,13 +59,13 @@ Figma-core aesthetic (toolbar, layers panel, properties panel, canvas grid). Key
 | `F` | Fullscreen |
 | `Ctrl/⌘ + scroll` | Zoom with trackpad/mouse |
 
-### Focus mode behaviour
-- **Short slides** — content is optically centered (~45% from top), grid hidden, chrome hidden
+### Focus mode
+- **Short slides** — content optically centered (~45% from top), grid hidden, chrome hidden
 - **Tall slides** — top-aligned at natural scale, scrollable, no zoom applied
 
 ---
 
-## Developer Edition — 13 slides
+## Developer Edition — 17 slides
 
 GitHub dark UI (gray-900). Left sidebar = file tree navigation. All code blocks are copy-paste ready.
 
@@ -64,9 +73,11 @@ GitHub dark UI (gray-900). Left sidebar = file tree navigation. All code blocks 
 |---|---|
 | *(root)* | `README.md` · `CHANGELOG.md` |
 | `setup/` | `install.sh` · `mcp-config.md` · `figma-prep.md` |
-| `workflow/` | `loop.md` · `prompts.md` · `limits.md` · `code-to-figma.md` |
+| `workflow/` | `loop.md` · `figma-web-gap.md` · `limits.md` · `code-to-figma.md` |
+| `prompting/` | `anatomy.md` · `examples.md` · `templates.md` |
 | `skills/` | `intro.md` · `build.md` · `registry.md` |
 | `tools/` | `console-mcp.md` |
+| `team/` | `ways-of-working.md` |
 
 ### Keyboard shortcuts
 
@@ -93,6 +104,8 @@ gh api repos/:owner/figma-to-code-deck/pages \
   --method POST \
   --field source='{"branch":"main","path":"/"}'
 ```
+
+Live at: `https://taroontyagi.github.io/figma-to-code-deck/`
 
 ---
 
