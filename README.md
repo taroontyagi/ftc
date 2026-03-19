@@ -17,7 +17,7 @@ A field guide for designers and developers navigating the Figma → Claude → C
 ## Live URL (after GitHub Pages deploy)
 
 ```
-https://YOUR-USERNAME.github.io/figma-to-code-deck/
+https://taroontyagi.github.io/figma-to-code-deck/
 ```
 
 ---
